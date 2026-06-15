@@ -407,12 +407,18 @@ export default function App() {
     // Shift 450px to the right (further to the right) in mobile view
     const mobileShift = isDesktop ? 0 : 450;
     
-    // Apply user request: move 20% of base width (baseW) to the left on desktop (shifting 10% more to the right compared to 30%), 18% (vw) on mobile
-    const adjX = isDesktop ? -(baseW * 0.2) : -(vw * 0.18);
+    // Specifically detect smaller laptops, standard HD 1280x720p landscape screens, and heights <= 768px in landscape mode
+    const is720p = isDesktop && (
+      (vw === 1280 && vh === 720) ||
+      (vw <= 1366 && vh <= 768)
+    );
+
+    // Apply user request: move 20% of base width (baseW) to the left on desktop (shifting 10% more to the right compared to 30%), or keep centered for 1280x720 landscape, 18% (vw) on mobile
+    const adjX = isDesktop ? (is720p ? 0 : -(baseW * 0.2)) : -(vw * 0.18);
     const adjY = 0;
 
     const startX = (vw - baseW) / 2 + mobileShift + adjX;
-    const startY = isDesktop ? ((vh - imgH) / 2 + 120) : (vh - imgH + adjY);
+    const startY = isDesktop ? (is720p ? (vh - imgH) / 2 : ((vh - imgH) / 2 + 120)) : (vh - imgH + adjY);
     const finalScale = 1.45;
     const finalX = (vw - baseW * finalScale) / 2 + mobileShift * finalScale + adjX;
     const mobileOffset = !isDesktop ? -120 : 4;
