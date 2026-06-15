@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { X, ArrowRight, ArrowUpRight, Menu } from 'lucide-react';
 
 const TEAM_IMG = 'https://lh3.googleusercontent.com/d/1b8ek71gEEX40cTfi92DEWMi0UiY4acd_';
 const SAAS_FEE_IMG = 'https://lh3.googleusercontent.com/d/1rXF5RqLfZ30CPNumn7Ipt0pyIdJU-N0P';
@@ -256,6 +256,7 @@ export default function App() {
   const [navColor, setNavColor] = useState('#5c0612');
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [isDesktop, setIsDesktop] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [windowHeight, setWindowHeight] = useState(800);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState('Alle');
@@ -276,13 +277,29 @@ export default function App() {
   // Synchronize dynamic desktop state matches
   useEffect(() => {
     const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
+      const desktop = window.innerWidth >= 1024;
+      setIsDesktop(desktop);
       setWindowHeight(window.innerHeight);
+      if (desktop) {
+        setMobileMenuOpen(false);
+      }
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Prevent background scroll when mobile menu is open
+  useEffect(() => {
+    if (!isDesktop && mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.removeProperty('overflow');
+    }
+    return () => {
+      document.body.style.removeProperty('overflow');
+    };
+  }, [mobileMenuOpen, isDesktop]);
 
   // Section 1 Preloader timers setup exactly matching requirements
   useEffect(() => {
@@ -365,11 +382,9 @@ export default function App() {
 
   // Update house coordinates on scroll/resize exactly matching specifications
   const updateHousePosition = useCallback(() => {
-    if (!liftDone) return;
-
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const baseW = Math.max(vw, 1400);
+    const baseW = isDesktop ? 1400 : 1198; // 7% bigger on mobile view (1120 * 1.07 = 1198.4)
 
     const imgH = imgRef.current ? imgRef.current.offsetHeight : 0;
     const heroH = heroRef.current ? heroRef.current.offsetHeight : vh;
@@ -389,13 +404,19 @@ export default function App() {
     const smoothstep = (val: number) => val * val * (3 - 2 * val);
     const t = smoothstep(smoothstep(progress));
 
-    const startX = (vw - baseW) / 2;
-    const startY = vh - imgH;
+    // Shift 450px to the right (further to the right) in mobile view
+    const mobileShift = isDesktop ? 0 : 450;
+    
+    // Apply user request: move 20% of base width (baseW) to the left on desktop (shifting 10% more to the right compared to 30%), 18% (vw) on mobile
+    const adjX = isDesktop ? -(baseW * 0.2) : -(vw * 0.18);
+    const adjY = 0;
 
+    const startX = (vw - baseW) / 2 + mobileShift + adjX;
+    const startY = isDesktop ? ((vh - imgH) / 2 + 120) : (vh - imgH + adjY);
     const finalScale = 1.45;
-    const finalX = (vw - baseW * finalScale) / 2;
-    const mobileOffset = vw < 1024 ? -250 : 4;
-    const finalY = darkRect.bottom - imgH * finalScale + 500 + mobileOffset;
+    const finalX = (vw - baseW * finalScale) / 2 + mobileShift * finalScale + adjX;
+    const mobileOffset = !isDesktop ? -120 : 4;
+    const finalY = darkRect.bottom - imgH * finalScale + (isDesktop ? 500 : 400) + mobileOffset + adjY;
 
     if (progress <= 0) {
       setHousePosition({ x: startX, y: startY, scale: 1, blur: 0 });
@@ -406,19 +427,24 @@ export default function App() {
       const currentBlur = t * 16;
       setHousePosition({ x: currentX, y: currentY, scale: currentScale, blur: currentBlur });
     }
-  }, [liftDone]);
+  }, [isDesktop]);
 
   // Combined listener hook
   useEffect(() => {
-    if (!liftDone) return;
-
     updateHousePosition();
-    window.addEventListener('scroll', updateHousePosition, { passive: true });
     window.addEventListener('resize', updateHousePosition);
 
+    let handleScroll: (() => void) | null = null;
+    if (liftDone) {
+      handleScroll = updateHousePosition;
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    }
+
     return () => {
-      window.removeEventListener('scroll', updateHousePosition);
       window.removeEventListener('resize', updateHousePosition);
+      if (handleScroll) {
+        window.removeEventListener('scroll', handleScroll);
+      }
     };
   }, [liftDone, updateHousePosition]);
 
@@ -548,14 +574,14 @@ export default function App() {
           .hero-subtitle-desktop { display: none !important; }
           .hero-subtitle-mobile  { display: block !important; }
           .hero-text-block { padding-top: 130px !important; text-align: center !important; }
-          .hero-title { font-size: 6.8vw !important; white-space: nowrap !important; letter-spacing: -0.03em !important; text-align: center !important; }
+          .hero-title { font-size: clamp(14px, 5.5vw, 22px) !important; white-space: nowrap !important; letter-spacing: -0.03em !important; text-align: center !important; }
         }
         
         @media (min-width: 640px) and (max-width: 1023px) {
           .hero-subtitle-desktop { display: none !important; }
           .hero-subtitle-mobile  { display: block !important; }
           .hero-text-block { padding-top: 150px !important; text-align: center !important; }
-          .hero-title { font-size: 5.8vw !important; white-space: nowrap !important; letter-spacing: -0.03em !important; text-align: center !important; }
+          .hero-title { font-size: clamp(22px, 5.0vw, 36px) !important; white-space: nowrap !important; letter-spacing: -0.03em !important; text-align: center !important; }
         }
         
         @media (min-width: 1024px) {
@@ -579,7 +605,7 @@ export default function App() {
         @media (max-width: 1023px) {
           .s3-gallery-section {
             height: auto !important;
-            min-height: 100vh !important;
+            min-height: auto !important;
             overflow: visible !important;
           }
           .s3-ticker-wrap {
@@ -622,7 +648,7 @@ export default function App() {
 
         @media (max-width: 479px) {
           .s3-gallery-content {
-            padding: 60px 12px 48px !important;
+            padding: 60px 12px 54px !important;
           }
           .gallery-expand-row {
             gap: 6px !important;
@@ -672,7 +698,7 @@ export default function App() {
       >
         {/* Left: Brand name grid cell */}
         <div 
-          className="flex items-center px-4 sm:px-8 border-r"
+          className="flex items-center px-2 xs:px-4 sm:px-8 border-r"
           style={{ borderColor: `${navColor}15` }}
         >
           <a 
@@ -683,7 +709,7 @@ export default function App() {
               setCurrentPage('home');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="font-syne text-xs xs:text-sm tracking-[0.2em] uppercase select-none cursor-pointer flex-shrink-0"
+            className="font-syne text-[10px] min-[360px]:text-xs xs:text-sm tracking-[0.1em] xs:tracking-[0.2em] uppercase select-none cursor-pointer flex-shrink-0"
           >
             <span className="font-black" style={{ color: navColor }}>swissrealplan</span>
             <span className="font-extrabold text-[#5c0612]">.</span>
@@ -693,112 +719,166 @@ export default function App() {
         {/* Middle structural empty space spacer reminiscent of open plan design */}
         <div className="flex-grow hidden xs:block" />
 
-        {/* Right side navigation grid cells */}
-        <div 
-          className="flex items-stretch border-l ml-auto xs:ml-0"
-          style={{ borderColor: `${navColor}15` }}
-        >
-          {[
-            { label: 'projekte', href: '#listings', num: '01' },
-            { label: 'portfolio', href: '#portfolio', num: '02' },
-            { label: 'leistungen', href: '#story', num: '03' },
-            { label: 'kontakt', href: '#kontakt', num: '04' }
-          ].map((item) => {
-            const isActive = item.label === 'leistungen' && currentPage === 'architektur';
-            const displayLabel = item.label;
-            return (
-              <a
-                key={item.label}
-                id={`nav-link-${item.label}`}
-                href={item.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (item.label === 'leistungen') {
-                    setCurrentPage('architektur');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  } else {
-                    setCurrentPage('home');
-                    const targetId = item.href.substring(1);
-                    setTimeout(() => {
-                      const el = document.getElementById(targetId);
-                      if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }
-                    }, 80);
-                  }
-                }}
-                className="flex flex-col justify-center px-3 sm:px-6 md:px-8 lg:px-10 border-r last:border-r-0 hover:bg-black/5 dark:hover:bg-white/5 transition-colors relative cursor-pointer group"
-                style={{ 
-                  borderColor: `${navColor}15`,
-                }}
-              >
-                <span className="font-mono text-[7px] sm:text-[9px] tracking-widest opacity-40 group-hover:opacity-80 transition-opacity mb-0.5 uppercase">
-                  {item.num} //
-                </span>
-                <span 
-                  className="font-syne text-[8px] min-[360px]:text-[10px] sm:text-xs tracking-[0.15em] uppercase font-bold transition-all relative"
+        {/* Navigation Grid cells (Desktop links or Mobile Hamburger toggle) */}
+        {isDesktop ? (
+          <div 
+            className="flex items-stretch border-l ml-auto xs:ml-0"
+            style={{ borderColor: `${navColor}15` }}
+          >
+            {[
+              { label: 'projekte', href: '#portfolio', num: '01' },
+              { label: 'portfolio', href: '#listings', num: '02' },
+              { label: 'leistungen', href: '#story', num: '03' },
+              { label: 'kontakt', href: '#kontakt', num: '04' }
+            ].map((item) => {
+              const isActive = item.label === 'leistungen' && currentPage === 'architektur';
+              const displayLabel = item.label;
+              return (
+                <a
+                  key={item.label}
+                  id={`nav-link-${item.label}`}
+                  href={item.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (item.label === 'leistungen') {
+                      setCurrentPage('architektur');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else {
+                      setCurrentPage('home');
+                      const targetId = item.href.substring(1);
+                      setTimeout(() => {
+                        const el = document.getElementById(targetId);
+                        if (el) {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }, 80);
+                    }
+                  }}
+                  className="flex flex-col justify-center px-1.5 min-[360px]:px-2.5 xs:px-4 sm:px-6 md:px-8 lg:px-10 border-r last:border-r-0 hover:bg-black/5 dark:hover:bg-white/5 transition-colors relative cursor-pointer group"
+                  style={{ 
+                    borderColor: `${navColor}15`,
+                  }}
                 >
-                  {displayLabel}
-                  {/* Underlining Bauhaus solid bar accent indicator */}
+                  <span className="font-mono text-[5.5px] sm:text-[9px] tracking-widest opacity-40 group-hover:opacity-80 transition-opacity mb-0.5 uppercase">
+                    {item.num} //
+                  </span>
                   <span 
-                    className="absolute -bottom-1 left-0 w-full h-[2px] transition-transform duration-300 origin-left"
-                    style={{
-                      backgroundColor: navColor,
-                      transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
-                    }}
-                  />
-                </span>
-              </a>
-            );
-          })}
-        </div>
+                    className="font-syne text-[7.5px] min-[360px]:text-[9.5px] xs:text-[11px] sm:text-xs tracking-[0.05em] min-[360px]:tracking-[0.15em] uppercase font-bold transition-all relative"
+                  >
+                    {displayLabel}
+                    {/* Underlining Bauhaus solid bar accent indicator */}
+                    <span 
+                      className="absolute -bottom-1 left-0 w-full h-[2px] transition-transform duration-300 origin-left"
+                      style={{
+                        backgroundColor: navColor,
+                        transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
+                      }}
+                    />
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+        ) : (
+          <div 
+            className="flex items-stretch border-l ml-auto cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+            style={{ borderColor: `${navColor}15` }}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <button className="flex items-center gap-2 px-4 font-syne text-[10px] min-[360px]:text-xs uppercase font-black tracking-widest focus:outline-none">
+              <span>{mobileMenuOpen ? 'Schließen' : 'Menü'}</span>
+              {mobileMenuOpen ? (
+                <X className="w-4 h-4" />
+              ) : (
+                <Menu className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+        )}
       </nav>
+
+      {/* Mobile Fullscreen Menu Overlay */}
+      {!isDesktop && mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40 flex flex-col justify-between pt-24 pb-12 px-8 transition-all duration-300"
+          style={{ 
+            color: navColor === '#ffffff' ? '#ffffff' : '#5c0612',
+            backgroundColor: navColor === '#ffffff' ? '#1a1a1a' : '#f5f0ea',
+          }}
+        >
+          {/* Menu links aligned vertically with numbers */}
+          <div className="flex flex-col gap-5 mt-6">
+            {[
+              { label: 'projekte', href: '#portfolio', num: '01' },
+              { label: 'portfolio', href: '#listings', num: '02' },
+              { label: 'leistungen', href: '#story', num: '03' },
+              { label: 'kontakt', href: '#kontakt', num: '04' }
+            ].map((item) => {
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMobileMenuOpen(false);
+                    if (item.label === 'leistungen') {
+                      setCurrentPage('architektur');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else {
+                      setCurrentPage('home');
+                      const targetId = item.href.substring(1);
+                      setTimeout(() => {
+                        const el = document.getElementById(targetId);
+                        if (el) {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }, 120);
+                    }
+                  }}
+                  className="flex items-baseline py-4 border-b"
+                  style={{ borderColor: `${navColor}15` }}
+                >
+                  <span className="font-mono text-xs tracking-widest opacity-40 mr-4">
+                    {item.num} //
+                  </span>
+                  <span className="font-syne text-xl tracking-[0.1em] uppercase font-black">
+                    {item.label}
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+
+          {/* Footer of Mobile Menu */}
+          <div className="flex flex-col gap-2 border-t pt-6" style={{ borderColor: `${navColor}15` }}>
+            <span className="font-syne text-[10px] tracking-widest uppercase opacity-50">swissrealplan.</span>
+            <span className="font-mono text-[9px] opacity-40">Visp &amp; Murten / Schweiz</span>
+          </div>
+        </div>
+      )}
 
       {/* Section 4 — Scroll-Driven House Animation Layer */}
       <div
         id="scroll-house-wrapper"
-        style={
-          liftDone
-            ? {
-                position: 'fixed',
-                zIndex: 22,
-                pointerEvents: 'none',
-                willChange: 'transform',
-                top: 0,
-                left: 0,
-                width: '100%',
-                minWidth: '1400px',
-                transform: `translate(${housePosition.x}px, ${housePosition.y}px) scale(${housePosition.scale})`,
-                transformOrigin: 'top left',
-                display: currentPage === 'home' ? 'block' : 'none',
-              }
-            : {
-                position: 'fixed',
-                zIndex: 22,
-                pointerEvents: 'none',
-                willChange: 'transform',
-                bottom: 0,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '100%',
-                minWidth: '1400px',
-                display: currentPage === 'home' ? 'block' : 'none',
-              }
-        }
+        style={{
+          position: 'fixed',
+          zIndex: 22,
+          pointerEvents: 'none',
+          willChange: 'transform',
+          top: 0,
+          left: 0,
+          width: '100%',
+          minWidth: isDesktop ? '1400px' : '1198px',
+          transform: `translate(${housePosition.x}px, ${housePosition.y}px) scale(${housePosition.scale})`,
+          transformOrigin: 'top left',
+          display: currentPage === 'home' ? 'block' : 'none',
+        }}
       >
         <div
           id="scroll-house-inner"
-          style={
-            liftDone
-              ? {
-                  width: '100%',
-                }
-              : {
-                  width: '100%',
-                  transform: isLifting ? 'translateY(0)' : 'translateY(102vh)',
-                  transition: 'transform 1.5s cubic-bezier(0.45, 0, 0.15, 1) 0.4s',
-                }
-          }
+          style={{
+            width: '100%',
+          }}
         >
           <img
             ref={imgRef}
@@ -812,9 +892,7 @@ export default function App() {
             }}
             referrerPolicy="no-referrer"
             onLoad={() => {
-              if (liftDone) {
-                updateHousePosition();
-              }
+              updateHousePosition();
             }}
           />
         </div>
@@ -893,24 +971,24 @@ export default function App() {
               
               {/* Left Column: Portrait of the Architect (5 of 12 columns) */}
               <div className="lg:col-span-5 flex justify-center">
-                <div className="relative w-full max-w-[340px] aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-2xl">
+                <div className="relative w-full max-w-[200px] sm:max-w-[260px] lg:max-w-[340px] aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-2xl">
                   <img 
                     src={architectImg} 
                     alt="Architekt Dietrich Becker" 
                     className="w-full h-full object-cover" 
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-5">
-                    <span className="font-syne text-[10px] tracking-[0.25em] text-white/50 uppercase block font-semibold">Chefarchitekt</span>
-                    <h4 className="font-syne text-sm font-bold text-white uppercase tracking-wider mt-1">Dietrich Becker</h4>
-                    <p className="font-mono text-[9px] text-[#e8e4df]/60 mt-0.5">swissrealplan Studio Visp / Murten</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 sm:p-5">
+                    <span className="font-syne text-[8px] sm:text-[10px] tracking-[0.25em] text-white/50 uppercase block font-semibold">Chefarchitekt</span>
+                    <h4 className="font-syne text-xs sm:text-sm font-bold text-white uppercase tracking-wider mt-1">Dietrich Becker</h4>
+                    <p className="font-mono text-[8px] sm:text-[9px] text-[#e8e4df]/60 mt-0.5">swissrealplan Studio Visp / Murten</p>
                   </div>
                 </div>
               </div>
 
               {/* Right Column: Statement & Stats (7 of 12 columns) */}
               <div className="lg:col-span-7 flex flex-col justify-center">
-                <p className="s2-statement font-syne font-light text-[#e8e4df] leading-[1.3] text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl tracking-tight">
+                <p className="s2-statement font-syne font-light text-[#e8e4df] leading-[1.3] text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl tracking-tight pb-8 lg:pb-0">
                   Jedes von uns präsentierte Anwesen wird handverlesen<br className="hidden sm:inline" />
                   unter dem Aspekt der Beständigkeit, Verfeinerung<br className="hidden sm:inline" />
                   und des zeitlosen Details. Anspruch ist keine Verzierung.<br className="hidden sm:inline" />
@@ -1137,7 +1215,7 @@ export default function App() {
             </div>
 
             {/* Structured offices block */}
-            <div className="mt-12 space-y-6">
+            <div className="hidden md:block mt-12 space-y-6">
               <div className="border-l border-white/20 pl-4">
                 <span className="font-mono text-[10px] tracking-widest uppercase text-white/40 block">Office Visp</span>
                 <p className="font-sans text-xs text-white/80 mt-1">
