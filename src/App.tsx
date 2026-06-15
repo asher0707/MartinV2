@@ -444,7 +444,7 @@ export default function App() {
     const mobileLowerY = isMobile ? (vh * mobileLowerYFactor) : 0;
 
     // Optimize mobile starts so the center of the image is perfectly framed vertically without excessive empty sky (bring layout down by 100px so it never overlaps text, shift down by 3% of vh)
-    const startY = isDesktop ? (is720p ? ((vh - imgH) / 2 + vh * 0.06) : ((vh - imgH) / 2 + 120)) : (isMobile ? (vh - imgH + 100 + mobileLowerY) : (vh - imgH + adjY));
+    const startY = isDesktop ? (is720p ? ((vh - imgH) / 2 + vh * 0.04) : ((vh - imgH) / 2 + 120)) : (isMobile ? (vh - imgH + 100 + mobileLowerY) : (vh - imgH + adjY));
     const finalScale = 1.45;
     const finalX = (vw - baseW * finalScale) / 2 + mobileShift * finalScale + adjX;
     const mobileOffset = !isDesktop ? -120 : 4;
