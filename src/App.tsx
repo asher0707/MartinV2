@@ -415,9 +415,9 @@ export default function App() {
     // Shift 450px to the right (further to the right) in mobile view
     const mobileShift = isDesktop ? 0 : 450;
 
-    // Center the house absolutely (adjX = 0) on standard HD 1280x720p landscape screens to cover left/right symmetrically
+    // Shift the house 10% to the right (baseW * 0.1) on standard HD 1280x720p landscape screens to cover left/right symmetrically and keep it in frame
     // Otherwise, shift left by 20% on desktop, or keep -18% (vw) on mobile
-    const adjX = isDesktop ? (is720p ? 0 : -(baseW * 0.2)) : -(vw * 0.18);
+    const adjX = isDesktop ? (is720p ? (baseW * 0.1) : -(baseW * 0.2)) : -(vw * 0.18);
     const adjY = 0;
 
     const startX = (vw - baseW) / 2 + mobileShift + adjX;
