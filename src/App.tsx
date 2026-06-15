@@ -530,13 +530,15 @@ export default function App() {
         }
 
         .gallery-expand-item {
-          flex: 1 1 0%;
+          flex-grow: 1;
+          flex-shrink: 1;
+          flex-basis: 0%;
           height: 100%;
           border-radius: 12px;
           overflow: hidden;
           cursor: pointer;
-          transition: flex 0.6s cubic-bezier(0.25, 1, 0.3, 1), transform 0.6s cubic-bezier(0.25, 1, 0.3, 1) !important;
-          will-change: flex, transform;
+          transition: flex-grow 0.6s cubic-bezier(0.25, 1, 0.3, 1), flex-shrink 0.6s cubic-bezier(0.25, 1, 0.3, 1), transform 0.6s cubic-bezier(0.25, 1, 0.3, 1) !important;
+          will-change: flex-grow, flex-shrink, transform;
           position: relative;
         }
 
@@ -991,7 +993,9 @@ export default function App() {
                   }}
                   className="gallery-expand-item group relative rounded-xl overflow-hidden cursor-pointer block"
                   style={isDesktop ? {
-                    flex: hoveredIdx === index ? '5 1 0%' : (hoveredIdx !== null ? '0.33 1 0%' : '1 1 0%')
+                    flexGrow: hoveredIdx === index ? 2.5 : (hoveredIdx !== null ? 0.5 : 1),
+                    flexShrink: 1,
+                    flexBasis: '0%'
                   } : undefined}
                   onMouseEnter={() => isDesktop && setHoveredIdx(index)}
                   onMouseLeave={() => isDesktop && setHoveredIdx(null)}
