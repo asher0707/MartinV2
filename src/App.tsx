@@ -1,7 +1,34 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, ArrowRight, ArrowUpRight } from 'lucide-react';
 
-const architectImg = "/src/assets/images/team-photo.png";
+const TEAM_IMG = 'https://lh3.googleusercontent.com/d/1b8ek71gEEX40cTfi92DEWMi0UiY4acd_';
+const SAAS_FEE_IMG = 'https://lh3.googleusercontent.com/d/1rXF5RqLfZ30CPNumn7Ipt0pyIdJU-N0P';
+const EGGERBERG_IMG = 'https://lh3.googleusercontent.com/d/1GYOQcCL8KPrgYvq1wXvYT_lz6R50YSxP';
+const ERB_IMG = 'https://lh3.googleusercontent.com/d/1c-LSr5LTqPqZzY5HoPoIFjxpobyQ1hHz';
+const GREEN_VILLAGE_IMG = 'https://lh3.googleusercontent.com/d/12qxLUc7PW3OnMrDfCgf2-aMGC-Wnt6te';
+
+const CARD_1_IMG = 'https://lh3.googleusercontent.com/d/1dwiOPt1oZlD_M63G4Yks2bQ_ycEYrAl_';
+const CARD_2_IMG = 'https://lh3.googleusercontent.com/d/1CY9xtbgV4kBaz5yknrOmwiQBiuW8Gmrl';
+const CARD_3_IMG = 'https://lh3.googleusercontent.com/d/1GxjbDQ1746A0mcVYsPvoNlA8Ej35lOlS';
+const CARD_4_IMG = 'https://lh3.googleusercontent.com/d/1lcZUHmkYr6C3X42_Y9cvLevZ8BqdN-vw';
+const CARD_5_IMG = 'https://lh3.googleusercontent.com/d/1OpOmtdKHAscA888wNcKkBDnfjwI9Gnwv';
+const CARD_6_IMG = 'https://lh3.googleusercontent.com/d/144AdCCBtgAMD8Ie1Xf6vadLBiT_ToY7b';
+const CARD_7_IMG = 'https://lh3.googleusercontent.com/d/1ZN-0Kp6o-7pxP9QxMsE5eRLc-bA0olG3';
+const CARD_8_IMG = 'https://lh3.googleusercontent.com/d/18vF4YcOI2LBit8M1E6pFXcqV7LZ2Zeox';
+const CARD_9_IMG = 'https://lh3.googleusercontent.com/d/1Lp_46iHmlXo18Fxk28qqW6ns2IgCvUoJ';
+const CARD_10_IMG = 'https://lh3.googleusercontent.com/d/1ROcG4byefsAqlOZunXhOriVploE1fQZO';
+const CARD_11_IMG = 'https://lh3.googleusercontent.com/d/1QFEIShmZqIn_7OKHABKHFDui-NNDsFuk';
+const CARD_12_IMG = 'https://lh3.googleusercontent.com/d/11_5lfL9tV31LZOr4T4VKzZzsUpS0XGmu';
+const CARD_13_IMG = 'https://lh3.googleusercontent.com/d/1S3sS60HKQ-W8yPH2ScTQv6tuvFZVMGwN';
+const CARD_14_IMG = 'https://lh3.googleusercontent.com/d/1ApP9QGiGdk989dxYINeLk8s1d7M798TO';
+const CARD_15_IMG = 'https://lh3.googleusercontent.com/d/16lRuKDoXZz-efsS5qVYVUTJ--vyluH_J';
+const CARD_16_IMG = 'https://lh3.googleusercontent.com/d/1Ih-zHZ8hjWIlg1W199SVgE5PXJDlZkZV';
+const CARD_17_IMG = 'https://lh3.googleusercontent.com/d/1iETF504RUgSgGyDtsFpmLokrve9UkygU';
+const CARD_18_IMG = 'https://lh3.googleusercontent.com/d/19B8b7qknvMGEwcsb0SCt7m2URoSEKVvf';
+const CARD_19_IMG = 'https://lh3.googleusercontent.com/d/1_LHc9jSQlWPkD85lwTpn5UmKBmQqMZ_k';
+const CARD_20_IMG = 'https://lh3.googleusercontent.com/d/1XpRO_RiMzUs9CX9Yqwj_DLYCfIlNj7mR';
+
+const architectImg = TEAM_IMG;
 
 const BRAND_RED = '#5c0612';
 const FULL_TEXT = 'swissrealplan.';
@@ -19,25 +46,25 @@ const GALLERY_EXPAND_ITEMS: GalleryExpandItem[] = [
   {
     title: "Saas fee",
     subtitle: "Viz1",
-    img: "/src/assets/images/viz1.jpg",
+    img: SAAS_FEE_IMG,
     link: "https://alpenchaletdomino.com/"
   },
   {
     title: "Eggerberg",
     subtitle: "Viz2",
-    img: "/src/assets/images/viz2.jpg",
+    img: EGGERBERG_IMG,
     link: "https://soleilhome.info/"
   },
   {
     title: "Erb in Visp",
     subtitle: "Viz3",
-    img: "/src/assets/images/viz3.jpg",
+    img: ERB_IMG,
     link: "https://erbhome.info/"
   },
   {
     title: "Green village in Visp",
     subtitle: "Neu Fix 9 may",
-    img: "/src/assets/images/neu fix 9 May-1.jpg",
+    img: GREEN_VILLAGE_IMG,
     link: "coming-soon"
   }
 ];
@@ -52,26 +79,26 @@ interface ProjectItem {
 }
 
 const PROJECTS_LIST: ProjectItem[] = [
-  { id: 1, title: 'Wohnsiedlung', category: 'Planung', location: 'Visp, CH', year: '2026', img: '/src/assets/images/card1.jpeg' },
-  { id: 2, title: 'Ferienhaus', category: 'Wohnen', location: 'Staldenried, CH', year: '2023', img: '/src/assets/images/card2.jpeg' },
-  { id: 3, title: 'Wohnhaus', category: 'Wohnen', location: 'Ins, CH', year: '2022', img: '/src/assets/images/card3.jpeg' },
-  { id: 4, title: 'Umbau Wohnhaus', category: 'Sanierung', location: 'Naters, CH', year: '2024', img: '/src/assets/images/card4.jpeg' },
-  { id: 5, title: 'Umbau Wohnhaus', category: 'Sanierung', location: 'Staldenried, CH', year: '2021', img: '/src/assets/images/card5.jpeg' },
-  { id: 6, title: 'Geschäftshaus', category: 'Gewerbe', location: 'Visp, CH', year: '2023', img: '/src/assets/images/card6.jpeg' },
-  { id: 7, title: 'Wohnsiedlung', category: 'Planung', location: 'Brigerbad, CH', year: '2025', img: '/src/assets/images/card7.jpeg' },
-  { id: 8, title: 'Wohnhaus', category: 'Wohnen', location: 'Aarberg, CH', year: '2024', img: '/src/assets/images/card8.jpeg' },
-  { id: 9, title: 'Geschäftshaus', category: 'Gewerbe', location: 'Visp, CH', year: '2022', img: '/src/assets/images/card9.jpeg' },
-  { id: 10, title: 'Gewerbehaus', category: 'Gewerbe', location: 'Visp, CH', year: '2025', img: '/src/assets/images/card10.jpeg' },
-  { id: 11, title: 'Einfamilienhaus', category: 'Wohnen', location: 'Visp, CH', year: '2023', img: '/src/assets/images/card11.jpeg' },
-  { id: 12, title: 'Gewerbehaus', category: 'Gewerbe', location: 'Visp, CH', year: '2024', img: '/src/assets/images/card12.jpeg' },
-  { id: 13, title: 'Geschäftszentrum', category: 'Gewerbe', location: 'Visp, CH', year: '2025', img: '/src/assets/images/card13.jpeg' },
-  { id: 14, title: 'Reihenhäuser', category: 'Planung', location: 'Baltschieder, CH', year: '2026', img: '/src/assets/images/card14.jpeg' },
-  { id: 15, title: 'Einfamilienhaus', category: 'Wohnen', location: 'Baltschieder, CH', year: '2023', img: '/src/assets/images/card15.jpeg' },
-  { id: 16, title: 'Einfamilienhaus', category: 'Wohnen', location: 'Visp, CH', year: '2022', img: '/src/assets/images/card16.jpeg' },
-  { id: 17, title: 'Umbau Einfamilienhaus', category: 'Sanierung', location: 'Sierre, CH', year: '2024', img: '/src/assets/images/card17.jpeg' },
-  { id: 18, title: 'Geschäftshaus', category: 'Gewerbe', location: 'Visp, CH', year: '2023', img: '/src/assets/images/card18.png' },
-  { id: 19, title: 'Umbau Restaurant', category: 'Sanierung', location: 'Binn, CH', year: '2025', img: '/src/assets/images/card19.jpeg' },
-  { id: 20, title: 'Umbau Wohnhaus', category: 'Sanierung', location: 'Ins, CH', year: '2024', img: '/src/assets/images/card20.jpeg' }
+  { id: 1, title: 'Wohnsiedlung', category: 'Planung', location: 'Visp, CH', year: '2026', img: CARD_1_IMG },
+  { id: 2, title: 'Ferienhaus', category: 'Wohnen', location: 'Staldenried, CH', year: '2023', img: CARD_2_IMG },
+  { id: 3, title: 'Wohnhaus', category: 'Wohnen', location: 'Ins, CH', year: '2022', img: CARD_3_IMG },
+  { id: 4, title: 'Umbau Wohnhaus', category: 'Sanierung', location: 'Naters, CH', year: '2024', img: CARD_4_IMG },
+  { id: 5, title: 'Umbau Wohnhaus', category: 'Sanierung', location: 'Staldenried, CH', year: '2021', img: CARD_5_IMG },
+  { id: 6, title: 'Geschäftshaus', category: 'Gewerbe', location: 'Visp, CH', year: '2023', img: CARD_6_IMG },
+  { id: 7, title: 'Wohnsiedlung', category: 'Planung', location: 'Brigerbad, CH', year: '2025', img: CARD_7_IMG },
+  { id: 8, title: 'Wohnhaus', category: 'Wohnen', location: 'Aarberg, CH', year: '2024', img: CARD_8_IMG },
+  { id: 9, title: 'Geschäftshaus', category: 'Gewerbe', location: 'Visp, CH', year: '2022', img: CARD_9_IMG },
+  { id: 10, title: 'Gewerbehaus', category: 'Gewerbe', location: 'Visp, CH', year: '2025', img: CARD_10_IMG },
+  { id: 11, title: 'Einfamilienhaus', category: 'Wohnen', location: 'Visp, CH', year: '2023', img: CARD_11_IMG },
+  { id: 12, title: 'Gewerbehaus', category: 'Gewerbe', location: 'Visp, CH', year: '2024', img: CARD_12_IMG },
+  { id: 13, title: 'Geschäftszentrum', category: 'Gewerbe', location: 'Visp, CH', year: '2025', img: CARD_13_IMG },
+  { id: 14, title: 'Reihenhäuser', category: 'Planung', location: 'Baltschieder, CH', year: '2026', img: CARD_14_IMG },
+  { id: 15, title: 'Einfamilienhaus', category: 'Wohnen', location: 'Baltschieder, CH', year: '2023', img: CARD_15_IMG },
+  { id: 16, title: 'Einfamilienhaus', category: 'Wohnen', location: 'Visp, CH', year: '2022', img: CARD_16_IMG },
+  { id: 17, title: 'Umbau Einfamilienhaus', category: 'Sanierung', location: 'Sierre, CH', year: '2024', img: CARD_17_IMG },
+  { id: 18, title: 'Geschäftshaus', category: 'Gewerbe', location: 'Visp, CH', year: '2023', img: CARD_18_IMG },
+  { id: 19, title: 'Umbau Restaurant', category: 'Sanierung', location: 'Binn, CH', year: '2025', img: CARD_19_IMG },
+  { id: 20, title: 'Umbau Wohnhaus', category: 'Sanierung', location: 'Ins, CH', year: '2024', img: CARD_20_IMG }
 ];
 
 interface ServiceItem {
@@ -90,7 +117,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 1 / 10",
     title: "Studien und Analysen",
     description: "Standortbewertungen, Machbarkeitsstudien und tiefgehende Analysen, die jedem Projekt eine fundierte Grundlage geben. Wir prüfen Topografie, Recht, Markt und Nutzung — bevor die erste Linie gezogen wird.",
-    image: "/src/assets/images/card1.jpeg"
+    image: CARD_1_IMG
   },
   {
     id: "projektentwicklung",
@@ -98,7 +125,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 2 / 10",
     title: "Projektentwicklung",
     description: "Von der ersten Vision bis zum tragfähigen Konzept. Wir entwickeln Projekte mit Weitsicht, vereinen architektonische Qualität mit wirtschaftlicher Logik und schaffen Räume mit nachhaltigem Wert.",
-    image: "/src/assets/images/card2.jpeg"
+    image: CARD_2_IMG
   },
   {
     id: "bewilligungsverfahren",
@@ -106,7 +133,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 3 / 10",
     title: "Bewilligungsverfahren",
     description: "Wir begleiten Bauherren durch das gesamte Bewilligungsverfahren — präzise Gesuche, klare Kommunikation mit Behörden und ein souveräner Umgang mit Auflagen und Einsprachen.",
-    image: "/src/assets/images/card3.jpeg"
+    image: CARD_3_IMG
   },
   {
     id: "ausfuehrungsplanung",
@@ -114,7 +141,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 4 / 10",
     title: "Ausführungsplanung",
     description: "Detailgenaue Pläne, präzise Materialisierung, klare Schnittstellen. Unsere Ausführungsplanung ist die Sprache, die Handwerker und Unternehmer auf der Baustelle führt.",
-    image: "/src/assets/images/card4.jpeg"
+    image: CARD_4_IMG
   },
   {
     id: "bauleitung-realisierung",
@@ -122,7 +149,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 5 / 10",
     title: "Bauleitung und Realisierung",
     description: "Wir führen die Baustelle mit Schweizer Präzision — Termine, Kosten und Qualität in Balance. Unsere Bauleitung ist der ruhige Taktgeber zwischen Plan und Bauwerk.",
-    image: "/src/assets/images/card5.jpeg"
+    image: CARD_5_IMG
   },
   {
     id: "umbauten-sanierungen",
@@ -130,7 +157,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 6 / 10",
     title: "Umbauten und Sanierungen",
     description: "Bestehende Substanz weiterdenken: behutsame Umbauten, energetische Sanierungen und Eingriffe, die den Charakter eines Hauses respektieren und seinen Wert neu definieren.",
-    image: "/src/assets/images/card6.jpeg"
+    image: CARD_6_IMG
   },
   {
     id: "totalunternehmung",
@@ -138,7 +165,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 7 / 10",
     title: "Totalunternehmung",
     description: "Ein Ansprechpartner. Ein Vertrag. Volle Verantwortung. Als Totalunternehmer realisieren wir Projekte zum Festpreis und Festtermin — Sie behalten die Übersicht, wir den Bau.",
-    image: "/src/assets/images/card7.jpeg"
+    image: CARD_7_IMG
   },
   {
     id: "immobilien",
@@ -146,7 +173,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 8 / 10",
     title: "Immobilien",
     description: "Wir vermarkten Wohn- und Renditeobjekte mit demselben gestalterischen Anspruch, mit dem wir bauen. Diskret, professionell, mit Gespür für Lage, Architektur und Zielgruppe.",
-    image: "/src/assets/images/card8.jpeg"
+    image: CARD_8_IMG
   },
   {
     id: "investment",
@@ -154,7 +181,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 9 / 10",
     title: "Investment",
     description: "Strukturierte Investments in werthaltige Schweizer Immobilien. Wir identifizieren Chancen, entwickeln Renditeobjekte und begleiten Investoren von der Akquisition bis zur Übergabe.",
-    image: "/src/assets/images/card9.jpeg"
+    image: CARD_9_IMG
   },
   {
     id: "bauhandel",
@@ -162,7 +189,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 10 / 10",
     title: "Bauhandel",
     description: "Hochwertige Bauelemente aus einer Hand: Küchen, Bäder, Schlafzimmer, Türen und Einbaumöbel. Wir liefern und montieren ausgewählte Produkte führender Hersteller — von der Beratung im Showroom bis zur fertigen Installation vor Ort.",
-    image: "/src/assets/images/card10.jpeg"
+    image: CARD_10_IMG
   }
 ];
 
