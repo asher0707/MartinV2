@@ -393,8 +393,18 @@ export default function App() {
 
     const isMobile = !isDesktop && vw < 640;
 
-    // Desktop gets 1400. Tablet gets 1557. Mobile gets 15% smaller (1557 * 0.85 = 1323) as requested.
-    const baseW = isDesktop ? 1400 : (isMobile ? 1323 : 1557);
+    // Responsive height-based scale and shift strictly for mobile view
+    // At vh <= 667, looks great with standard size and position. At vh >= 896 (e.g. newer models iPhone 14 Pro Max), 14% bigger and shifted left.
+    let mobileScaleMultiplier = 1.0;
+    let mobileXFactor = 0.35;
+    if (isMobile) {
+      const r = Math.min(Math.max((vh - 667) / (896 - 667), 0), 1);
+      mobileScaleMultiplier = 1.0 + r * 0.14; // 14% bigger at vh >= 896
+      mobileXFactor = 0.35 - r * 0.14; // Shifted left proportionately (subtracts 14% of baseW)
+    }
+
+    // Desktop gets 1400. Tablet gets 1557. Mobile gets 15% smaller (1557 * 0.85 = 1323) scaled by mobileScaleMultiplier
+    const baseW = isDesktop ? 1400 : (isMobile ? (1323 * mobileScaleMultiplier) : 1557);
 
     const imgH = imgRef.current ? imgRef.current.offsetHeight : 0;
     const heroH = heroRef.current ? heroRef.current.offsetHeight : vh;
@@ -419,11 +429,11 @@ export default function App() {
     const mobileShift = isDesktop ? 0 : (isMobile ? 0 : 450);
 
     // Shift the house 10% to the right (baseW * 0.1) on standard HD 1280x720p landscape screens to cover left/right symmetrically and keep it in frame
-    // In mobile view (isMobile), shift the house 35% to the right (baseW * 0.35) as requested by the user
+    // In mobile view (isMobile), we shift by dynamic mobileXFactor (starts at 35% at 667px height, and shifts leftward as height increases)
     // Otherwise, shift left by 20% on desktop, or keep -18% (vw) on tablet
     const adjX = isDesktop 
       ? (is720p ? (baseW * 0.1) : -(baseW * 0.2)) 
-      : (isMobile ? (baseW * 0.35) : -(vw * 0.18));
+      : (isMobile ? (baseW * mobileXFactor) : -(vw * 0.18));
     const adjY = 0;
 
     const startX = (vw - baseW) / 2 + mobileShift + adjX;
@@ -431,7 +441,6 @@ export default function App() {
     // In mobile view, lower the image by an additional 3% of viewport height (vh) as requested
     const mobileLowerY = isMobile ? (vh * 0.03) : 0;
 
-    // On is720p landscape screens, bring the image 6% lower than layout center, otherwise leave at 120 offset for normal desktops
     // Optimize mobile starts so the center of the image is perfectly framed vertically without excessive empty sky (bring layout down by 100px so it never overlaps text, shift down by 3% of vh)
     const startY = isDesktop ? (is720p ? ((vh - imgH) / 2 + vh * 0.06) : ((vh - imgH) / 2 + 120)) : (isMobile ? (vh - imgH + 100 + mobileLowerY) : (vh - imgH + adjY));
     const finalScale = 1.45;
