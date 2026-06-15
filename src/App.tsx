@@ -263,7 +263,7 @@ export default function App() {
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '', interest: 'Wohnen' });
 
-  const [housePosition, setHousePosition] = useState({ x: 0, y: 0, scale: 1, blur: 0 });
+  const [housePosition, setHousePosition] = useState({ x: 0, y: 0, scale: 1, blur: 0, baseW: 1400 });
 
   const heroRef = useRef<HTMLDivElement>(null);
   const darkSec1Ref = useRef<HTMLDivElement>(null);
@@ -385,7 +385,14 @@ export default function App() {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    const baseW = isDesktop ? 1400 : 1198;
+    // Specifically detect smaller laptops, standard HD 1280x720p landscape screens, and heights <= 768px in landscape mode
+    const is720p = isDesktop && (
+      (vw === 1280 && vh === 720) ||
+      (vw <= 1366 && vh <= 768)
+    );
+
+    // Desktop gets 1400. Mobile/tablet gets 1198 * 1.3 = 1557 (30% bigger as requested).
+    const baseW = isDesktop ? 1400 : 1557;
 
     const imgH = imgRef.current ? imgRef.current.offsetHeight : 0;
     const heroH = heroRef.current ? heroRef.current.offsetHeight : vh;
@@ -408,25 +415,27 @@ export default function App() {
     // Shift 450px to the right (further to the right) in mobile view
     const mobileShift = isDesktop ? 0 : 450;
 
-    // Apply user request: move 20% of base width (baseW) to the left on desktop (shifting 10% more to the right compared to 30%), 18% (vw) on mobile
-    const adjX = isDesktop ? -(baseW * 0.2) : -(vw * 0.18);
+    // Center the house absolutely (adjX = 0) on standard HD 1280x720p landscape screens to cover left/right symmetrically
+    // Otherwise, shift left by 20% on desktop, or keep -18% (vw) on mobile
+    const adjX = isDesktop ? (is720p ? 0 : -(baseW * 0.2)) : -(vw * 0.18);
     const adjY = 0;
 
     const startX = (vw - baseW) / 2 + mobileShift + adjX;
-    const startY = isDesktop ? ((vh - imgH) / 2 + 120) : (vh - imgH + adjY);
+    // On is720p landscape screens, bring the image 6% lower than layout center, otherwise leave at 120 offset for normal desktops
+    const startY = isDesktop ? (is720p ? ((vh - imgH) / 2 + vh * 0.06) : ((vh - imgH) / 2 + 120)) : (vh - imgH + adjY);
     const finalScale = 1.45;
     const finalX = (vw - baseW * finalScale) / 2 + mobileShift * finalScale + adjX;
     const mobileOffset = !isDesktop ? -120 : 4;
     const finalY = darkRect.bottom - imgH * finalScale + (isDesktop ? 500 : 400) + mobileOffset + adjY;
 
     if (progress <= 0) {
-      setHousePosition({ x: startX, y: startY, scale: 1, blur: 0 });
+      setHousePosition({ x: startX, y: startY, scale: 1, blur: 0, baseW });
     } else {
       const currentX = startX + t * (finalX - startX);
       const currentY = startY + t * (finalY - startY);
       const currentScale = 1 + t * (finalScale - 1);
       const currentBlur = t * 16;
-      setHousePosition({ x: currentX, y: currentY, scale: currentScale, blur: currentBlur });
+      setHousePosition({ x: currentX, y: currentY, scale: currentScale, blur: currentBlur, baseW });
     }
   }, [isDesktop]);
 
@@ -869,7 +878,7 @@ export default function App() {
           top: 0,
           left: 0,
           width: '100%',
-          minWidth: isDesktop ? '1400px' : '1198px',
+          minWidth: `${housePosition.baseW || (isDesktop ? 1400 : 1557)}px`,
           transform: `translate(${housePosition.x}px, ${housePosition.y}px) scale(${housePosition.scale})`,
           transformOrigin: 'top left',
           display: currentPage === 'home' ? 'block' : 'none',
