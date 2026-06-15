@@ -256,6 +256,7 @@ export default function App() {
   const [navColor, setNavColor] = useState('#5c0612');
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [isDesktop, setIsDesktop] = useState(true);
+  const [windowHeight, setWindowHeight] = useState(800);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState('Alle');
   const [contactSubmitted, setContactSubmitted] = useState(false);
@@ -276,6 +277,7 @@ export default function App() {
   useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth >= 1024);
+      setWindowHeight(window.innerHeight);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -978,7 +980,9 @@ export default function App() {
           <div className="gallery-expand-row flex w-full h-[70%] max-w-[1200px] gap-1.5">
             {GALLERY_EXPAND_ITEMS.map((item, index) => {
               const isComingSoon = item.link === "coming-soon";
-              const isTextVisible = !isDesktop || (hoveredIdx === index);
+              // Disable hover expand accordion animation for low-height landscapes (e.g. 1280x720p)
+              const isHoverAnimEnabled = isDesktop && windowHeight > 768;
+              const isTextVisible = !isHoverAnimEnabled || (hoveredIdx === index);
               return (
                 <a
                   key={index}
@@ -993,15 +997,15 @@ export default function App() {
                   }}
                   className="gallery-expand-item group relative rounded-xl overflow-hidden cursor-pointer block"
                   style={isDesktop ? {
-                    flexGrow: hoveredIdx === index ? 2.5 : (hoveredIdx !== null ? 0.5 : 1),
+                    flexGrow: isHoverAnimEnabled ? (hoveredIdx === index ? 2.5 : (hoveredIdx !== null ? 0.5 : 1)) : 1,
                     flexShrink: 1,
                     flexBasis: '0%'
                   } : undefined}
-                  onMouseEnter={() => isDesktop && setHoveredIdx(index)}
-                  onMouseLeave={() => isDesktop && setHoveredIdx(null)}
+                  onMouseEnter={() => isHoverAnimEnabled && setHoveredIdx(index)}
+                  onMouseLeave={() => isHoverAnimEnabled && setHoveredIdx(null)}
                 >
-                  {/* Content Overlay Mask */}
-                  <div className="absolute inset-0 bg-black/45 z-10 transition-opacity duration-500 pointer-events-none group-hover:opacity-10" />
+                  {/* Elegant bottom-up soft vignette to protect white text legibility without overall image dimming */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
 
                   {/* Cover image */}
                   <img
@@ -1019,11 +1023,11 @@ export default function App() {
                   }`}>
                     <div className="flex items-end justify-between gap-4">
                       <div>
-                        <h4 className="font-syne font-black tracking-tight uppercase leading-none text-base sm:text-xl lg:text-2xl">
+                        <h4 className="font-syne font-black tracking-tight uppercase leading-none text-base sm:text-xl lg:text-2xl [text-shadow:_0_2px_4px_rgba(0,0,0,0.8)]">
                           {item.title}
                         </h4>
                       </div>
-                      <ArrowUpRight className="opacity-85 flex-shrink-0 mb-0.5 transition-all duration-300 w-5 h-5 sm:w-7 sm:h-7" />
+                      <ArrowUpRight className="opacity-85 flex-shrink-0 mb-0.5 transition-all duration-300 w-5 h-5 sm:w-7 sm:h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
                     </div>
                   </div>
                 </a>
