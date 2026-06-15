@@ -394,13 +394,15 @@ export default function App() {
     const isMobile = !isDesktop && vw < 640;
 
     // Responsive height-based scale and shift strictly for mobile view
-    // At vh <= 667, looks great with standard size and position. At vh >= 896 (e.g. newer models iPhone 14 Pro Max), 14% bigger and shifted left.
+    // At vh <= 667, looks great with standard size and position. At vh >= 896 (e.g. newer models iPhone 14 Pro Max), 14% bigger, 40% to right, and 6% to above.
     let mobileScaleMultiplier = 1.0;
     let mobileXFactor = 0.35;
+    let mobileLowerYFactor = 0.03;
     if (isMobile) {
       const r = Math.min(Math.max((vh - 667) / (896 - 667), 0), 1);
       mobileScaleMultiplier = 1.0 + r * 0.14; // 14% bigger at vh >= 896
-      mobileXFactor = 0.35 - r * 0.14; // Shifted left proportionately (subtracts 14% of baseW)
+      mobileXFactor = 0.35 + r * 0.05; // 35% to right at 667px, 40% to right at 896px
+      mobileLowerYFactor = 0.03 - r * 0.09; // 3% below (positive offset) at 667px, 6% above (negative offset) at 896px
     }
 
     // Desktop gets 1400. Tablet gets 1557. Mobile gets 15% smaller (1557 * 0.85 = 1323) scaled by mobileScaleMultiplier
@@ -429,7 +431,7 @@ export default function App() {
     const mobileShift = isDesktop ? 0 : (isMobile ? 0 : 450);
 
     // Shift the house 10% to the right (baseW * 0.1) on standard HD 1280x720p landscape screens to cover left/right symmetrically and keep it in frame
-    // In mobile view (isMobile), we shift by dynamic mobileXFactor (starts at 35% at 667px height, and shifts leftward as height increases)
+    // In mobile view (isMobile), we shift by dynamic mobileXFactor (starts at 35% at 667px height, and shifts rightward to 40% as height increases)
     // Otherwise, shift left by 20% on desktop, or keep -18% (vw) on tablet
     const adjX = isDesktop 
       ? (is720p ? (baseW * 0.1) : -(baseW * 0.2)) 
@@ -438,8 +440,8 @@ export default function App() {
 
     const startX = (vw - baseW) / 2 + mobileShift + adjX;
     
-    // In mobile view, lower the image by an additional 3% of viewport height (vh) as requested
-    const mobileLowerY = isMobile ? (vh * 0.03) : 0;
+    // In mobile view, lower/raise the image by the dynamic model-adjusted percentage of viewport height (vh) as requested
+    const mobileLowerY = isMobile ? (vh * mobileLowerYFactor) : 0;
 
     // Optimize mobile starts so the center of the image is perfectly framed vertically without excessive empty sky (bring layout down by 100px so it never overlaps text, shift down by 3% of vh)
     const startY = isDesktop ? (is720p ? ((vh - imgH) / 2 + vh * 0.06) : ((vh - imgH) / 2 + 120)) : (isMobile ? (vh - imgH + 100 + mobileLowerY) : (vh - imgH + adjY));
