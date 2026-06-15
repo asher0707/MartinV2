@@ -391,8 +391,10 @@ export default function App() {
       (vw <= 1366 && vh <= 768)
     );
 
-    // Desktop gets 1400. Mobile/tablet gets 1198 * 1.3 = 1557 (30% bigger as requested).
-    const baseW = isDesktop ? 1400 : 1557;
+    const isMobile = !isDesktop && vw < 640;
+
+    // Desktop gets 1400. Tablet gets 1557. Mobile gets 15% smaller (1557 * 0.85 = 1323) as requested.
+    const baseW = isDesktop ? 1400 : (isMobile ? 1323 : 1557);
 
     const imgH = imgRef.current ? imgRef.current.offsetHeight : 0;
     const heroH = heroRef.current ? heroRef.current.offsetHeight : vh;
@@ -413,20 +415,29 @@ export default function App() {
     const t = smoothstep(smoothstep(progress));
 
     // Shift 450px to the right (further to the right) in mobile view
-    const mobileShift = isDesktop ? 0 : 450;
+    // Keep tablet exactly at 450, desktop at 0, and optimize for mobile screen sizes (use clean 0 base shift to let 35% right shift handle alignment)
+    const mobileShift = isDesktop ? 0 : (isMobile ? 0 : 450);
 
     // Shift the house 10% to the right (baseW * 0.1) on standard HD 1280x720p landscape screens to cover left/right symmetrically and keep it in frame
-    // Otherwise, shift left by 20% on desktop, or keep -18% (vw) on mobile
-    const adjX = isDesktop ? (is720p ? (baseW * 0.1) : -(baseW * 0.2)) : -(vw * 0.18);
+    // In mobile view (isMobile), shift the house 35% to the right (baseW * 0.35) as requested by the user
+    // Otherwise, shift left by 20% on desktop, or keep -18% (vw) on tablet
+    const adjX = isDesktop 
+      ? (is720p ? (baseW * 0.1) : -(baseW * 0.2)) 
+      : (isMobile ? (baseW * 0.35) : -(vw * 0.18));
     const adjY = 0;
 
     const startX = (vw - baseW) / 2 + mobileShift + adjX;
+    
+    // In mobile view, lower the image by an additional 3% of viewport height (vh) as requested
+    const mobileLowerY = isMobile ? (vh * 0.03) : 0;
+
     // On is720p landscape screens, bring the image 6% lower than layout center, otherwise leave at 120 offset for normal desktops
-    const startY = isDesktop ? (is720p ? ((vh - imgH) / 2 + vh * 0.06) : ((vh - imgH) / 2 + 120)) : (vh - imgH + adjY);
+    // Optimize mobile starts so the center of the image is perfectly framed vertically without excessive empty sky (bring layout down by 100px so it never overlaps text, shift down by 3% of vh)
+    const startY = isDesktop ? (is720p ? ((vh - imgH) / 2 + vh * 0.06) : ((vh - imgH) / 2 + 120)) : (isMobile ? (vh - imgH + 100 + mobileLowerY) : (vh - imgH + adjY));
     const finalScale = 1.45;
     const finalX = (vw - baseW * finalScale) / 2 + mobileShift * finalScale + adjX;
     const mobileOffset = !isDesktop ? -120 : 4;
-    const finalY = darkRect.bottom - imgH * finalScale + (isDesktop ? 500 : 400) + mobileOffset + adjY;
+    const finalY = darkRect.bottom - imgH * finalScale + (isDesktop ? 500 : 400) + mobileOffset + adjY + mobileLowerY;
 
     if (progress <= 0) {
       setHousePosition({ x: startX, y: startY, scale: 1, blur: 0, baseW });
@@ -583,8 +594,17 @@ export default function App() {
         @media (max-width: 639px) {
           .hero-subtitle-desktop { display: none !important; }
           .hero-subtitle-mobile  { display: block !important; }
-          .hero-text-block { padding-top: 130px !important; text-align: center !important; }
-          .hero-title { font-size: clamp(14px, 5.5vw, 22px) !important; white-space: nowrap !important; letter-spacing: -0.03em !important; text-align: center !important; }
+          .hero-text-block { padding-top: 110px !important; text-align: center !important; }
+          .hero-title { 
+            font-size: clamp(26px, 8.5vw, 34px) !important; 
+            white-space: normal !important; 
+            max-width: 320px !important; 
+            line-height: 1.15 !important; 
+            letter-spacing: -0.03em !important; 
+            text-align: center !important; 
+            font-weight: 900 !important;
+            margin: 0 auto !important;
+          }
         }
         
         @media (min-width: 640px) and (max-width: 1023px) {
