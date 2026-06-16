@@ -456,7 +456,9 @@ export default function App() {
       : (isMobile ? (baseW * mobileXFactor) : -(vw * 0.18));
     const adjY = 0;
 
-    const startX = (vw - baseW) / 2 + mobileShift + adjX;
+    const startX = (isDesktop && vw >= 1396) 
+      ? -5 
+      : ((vw - baseW) / 2 + mobileShift + adjX);
     
     // In mobile view, lower/raise the image by the dynamic model-adjusted percentage of viewport height (vh) as requested
     const mobileLowerY = isMobile ? (vh * mobileLowerYFactor) : 0;
@@ -464,7 +466,9 @@ export default function App() {
     // Optimize mobile starts so the center of the image is perfectly framed vertically without excessive empty sky (bring layout down by 100px so it never overlaps text, shift down by 3% of vh)
     const startY = isDesktop ? (is720p ? ((vh - imgH) / 2 + vh * 0.04) : ((vh - imgH) / 2 + 120)) : (isMobile ? (vh - imgH + 100 + mobileLowerY) : (vh - imgH + adjY));
     const finalScale = 1.45;
-    const finalX = (vw - baseW * finalScale) / 2 + mobileShift * finalScale + adjX;
+    const finalX = (isDesktop && vw >= 1396)
+      ? (-0.225 * vw + 118.75)
+      : ((vw - baseW * finalScale) / 2 + mobileShift * finalScale + adjX);
     const mobileOffset = !isDesktop ? -120 : 4;
     const finalY = darkRect.bottom - imgH * finalScale + (isDesktop ? 500 : 400) + mobileOffset + adjY + mobileLowerY;
 
