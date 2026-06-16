@@ -28,6 +28,17 @@ const CARD_18_IMG = 'https://lh3.googleusercontent.com/d/19B8b7qknvMGEwcsb0SCt7m
 const CARD_19_IMG = 'https://lh3.googleusercontent.com/d/1_LHc9jSQlWPkD85lwTpn5UmKBmQqMZ_k';
 const CARD_20_IMG = 'https://lh3.googleusercontent.com/d/1XpRO_RiMzUs9CX9Yqwj_DLYCfIlNj7mR';
 
+const ARCH_1_IMG = 'https://lh3.googleusercontent.com/d/16GBwb5ZIf08IkJU3q1tva25k4Ixs3PlG';
+const ARCH_2_IMG = 'https://lh3.googleusercontent.com/d/1bX9mQ5V0wB5_a3JTDZW1rDPIDXXCCktL';
+const ARCH_3_IMG = 'https://lh3.googleusercontent.com/d/166Q-NOLRVBQyJZVQM_gNpKlwzlTfxrHe';
+const ARCH_4_IMG = 'https://lh3.googleusercontent.com/d/1p-mDvCmNoHocCGYCwQv_hBiuT4qHeiEs';
+const ARCH_5_IMG = 'https://lh3.googleusercontent.com/d/1y34nL5cH3AJu4jajZsr-6Ge0hYy9r4kV';
+const ARCH_6_IMG = 'https://lh3.googleusercontent.com/d/1TPHbQygBloDEjfEWebz3bbYSaqzzWBbb';
+const ARCH_7_IMG = 'https://lh3.googleusercontent.com/d/1xeXFlKwGX8cfj69HkxTum5M8ErAi4ARX';
+const ARCH_8_IMG = 'https://lh3.googleusercontent.com/d/1oM4-amGm84wF4pSr9dlDmKP7198B3pG4';
+const ARCH_9_IMG = 'https://lh3.googleusercontent.com/d/12aBnimLm8ywSmT5ITD0A1y_y_HE8p5CL';
+const ARCH_10_IMG = 'https://lh3.googleusercontent.com/d/1rPpfkWSkq0pLdgPTVrn8gFslSAYql4GJ';
+
 const architectImg = TEAM_IMG;
 
 const BRAND_RED = '#5c0612';
@@ -117,7 +128,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 1 / 10",
     title: "Studien und Analysen",
     description: "Standortbewertungen, Machbarkeitsstudien und tiefgehende Analysen, die jedem Projekt eine fundierte Grundlage geben. Wir prüfen Topografie, Recht, Markt und Nutzung — bevor die erste Linie gezogen wird.",
-    image: CARD_1_IMG
+    image: ARCH_1_IMG
   },
   {
     id: "projektentwicklung",
@@ -125,7 +136,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 2 / 10",
     title: "Projektentwicklung",
     description: "Von der ersten Vision bis zum tragfähigen Konzept. Wir entwickeln Projekte mit Weitsicht, vereinen architektonische Qualität mit wirtschaftlicher Logik und schaffen Räume mit nachhaltigem Wert.",
-    image: CARD_2_IMG
+    image: ARCH_2_IMG
   },
   {
     id: "bewilligungsverfahren",
@@ -133,7 +144,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 3 / 10",
     title: "Bewilligungsverfahren",
     description: "Wir begleiten Bauherren durch das gesamte Bewilligungsverfahren — präzise Gesuche, klare Kommunikation mit Behörden und ein souveräner Umgang mit Auflagen und Einsprachen.",
-    image: CARD_3_IMG
+    image: ARCH_3_IMG
   },
   {
     id: "ausfuehrungsplanung",
@@ -141,7 +152,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 4 / 10",
     title: "Ausführungsplanung",
     description: "Detailgenaue Pläne, präzise Materialisierung, klare Schnittstellen. Unsere Ausführungsplanung ist die Sprache, die Handwerker und Unternehmer auf der Baustelle führt.",
-    image: CARD_4_IMG
+    image: ARCH_4_IMG
   },
   {
     id: "bauleitung-realisierung",
@@ -149,7 +160,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 5 / 10",
     title: "Bauleitung und Realisierung",
     description: "Wir führen die Baustelle mit Schweizer Präzision — Termine, Kosten und Qualität in Balance. Unsere Bauleitung ist der ruhige Taktgeber zwischen Plan und Bauwerk.",
-    image: CARD_5_IMG
+    image: ARCH_5_IMG
   },
   {
     id: "umbauten-sanierungen",
@@ -157,7 +168,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 6 / 10",
     title: "Umbauten und Sanierungen",
     description: "Bestehende Substanz weiterdenken: behutsame Umbauten, energetische Sanierungen und Eingriffe, die den Charakter eines Hauses respektieren und seinen Wert neu definieren.",
-    image: CARD_6_IMG
+    image: ARCH_6_IMG
   },
   {
     id: "totalunternehmung",
@@ -165,7 +176,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 7 / 10",
     title: "Totalunternehmung",
     description: "Ein Ansprechpartner. Ein Vertrag. Volle Verantwortung. Als Totalunternehmer realisieren wir Projekte zum Festpreis und Festtermin — Sie behalten die Übersicht, wir den Bau.",
-    image: CARD_7_IMG
+    image: ARCH_7_IMG
   },
   {
     id: "immobilien",
@@ -173,7 +184,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 8 / 10",
     title: "Immobilien",
     description: "Wir vermarkten Wohn- und Renditeobjekte mit demselben gestalterischen Anspruch, mit dem wir bauen. Diskret, professionell, mit Gespür für Lage, Architektur und Zielgruppe.",
-    image: CARD_8_IMG
+    image: ARCH_8_IMG
   },
   {
     id: "investment",
@@ -181,7 +192,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 9 / 10",
     title: "Investment",
     description: "Strukturierte Investments in werthaltige Schweizer Immobilien. Wir identifizieren Chancen, entwickeln Renditeobjekte und begleiten Investoren von der Akquisition bis zur Übergabe.",
-    image: CARD_9_IMG
+    image: ARCH_9_IMG
   },
   {
     id: "bauhandel",
@@ -189,7 +200,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
     subtitle: "Leistung 10 / 10",
     title: "Bauhandel",
     description: "Hochwertige Bauelemente aus einer Hand: Küchen, Bäder, Schlafzimmer, Türen und Einbaumöbel. Wir liefern und montieren ausgewählte Produkte führender Hersteller — von der Beratung im Showroom bis zur fertigen Installation vor Ort.",
-    image: CARD_10_IMG
+    image: ARCH_10_IMG
   }
 ];
 
@@ -967,22 +978,22 @@ export default function App() {
         >
           {/* Main single line centered title */}
           <div className="overflow-hidden w-full flex justify-center">
-            <h1 className="hero-title font-syne font-black uppercase text-black tracking-[-0.04em] leading-none text-center">
-              WOHNEN IM UNERSETZLICHEN
+            <h1 className="hero-title font-syne font-black text-black tracking-[-0.04em] leading-none text-center">
+              Wohnen in Architektur
             </h1>
           </div>
 
           {/* Desktop and mobile centralized taglines */}
           <div className="hero-subtitle-desktop mt-6 max-w-2xl opacity-80 text-center mx-auto">
             <p className="font-syne font-semibold text-[clamp(12px,1.4vw,18px)] leading-relaxed tracking-wider text-black">
-              Herrschaftliche Anwesen, entworfen mit Weitsicht, Anspruch und architektonischer Finesse.
+              Wir gestalten Räume mit Charakter, Klarheit und Identität.
             </p>
           </div>
 
           <div className="hero-subtitle-mobile mt-4 max-w-xs opacity-[0.65] text-center mx-auto">
             <p className="font-syne font-semibold text-[clamp(12px,3.2vw,15px)] leading-relaxed text-black">
-              Herrschaftliche Anwesen, entworfen mit Weitsicht,<br />
-              Anspruch und architektonischer Finesse.
+              Wir gestalten Räume mit Charakter,<br />
+              Klarheit und Identität.
             </p>
           </div>
         </div>
@@ -1015,13 +1026,13 @@ export default function App() {
                 <div className="relative w-full max-w-[200px] sm:max-w-[260px] lg:max-w-[340px] aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-2xl">
                   <img 
                     src={architectImg} 
-                    alt="Architekt Dietrich Becker" 
+                    alt="Architekt Martin Andereggen" 
                     className="w-full h-full object-cover" 
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 sm:p-5">
-                    <span className="font-syne text-[8px] sm:text-[10px] tracking-[0.25em] text-white/50 uppercase block font-semibold">Chefarchitekt</span>
-                    <h4 className="font-syne text-xs sm:text-sm font-bold text-white uppercase tracking-wider mt-1">Dietrich Becker</h4>
+                    <span className="font-syne text-[8px] sm:text-[10px] tracking-[0.25em] text-white/50 uppercase block font-semibold">Martin Andereggen</span>
+                    <h4 className="font-syne text-xs sm:text-sm font-bold text-white uppercase tracking-wider mt-1">Architekt </h4>
                     <p className="font-mono text-[8px] sm:text-[9px] text-[#e8e4df]/60 mt-0.5">swissrealplan Studio Visp / Murten</p>
                   </div>
                 </div>
@@ -1030,10 +1041,9 @@ export default function App() {
               {/* Right Column: Statement & Stats (7 of 12 columns) */}
               <div className="lg:col-span-7 flex flex-col justify-center">
                 <p className="s2-statement font-syne font-light text-[#e8e4df] leading-[1.3] text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl tracking-tight pb-8 lg:pb-0">
-                  Jedes von uns präsentierte Anwesen wird handverlesen<br className="hidden sm:inline" />
-                  unter dem Aspekt der Beständigkeit, Verfeinerung<br className="hidden sm:inline" />
-                  und des zeitlosen Details. Anspruch ist keine Verzierung.<br className="hidden sm:inline" />
-                  Es ist unsere Disziplin.
+                  Jedes Projekt wird mit Sorgfalt ausgewählt und geplant.<br className="hidden sm:inline" />
+                  Im Mittelpunkt stehen Beständigkeit, klare Gestaltung und zeitlose Architektur.<br className="hidden sm:inline" />
+                  Qualität ist für uns kein Zusatz, sondern die Grundlage unseres Handelns
                 </p>
 
                 {/* Stats / Werte row */}
