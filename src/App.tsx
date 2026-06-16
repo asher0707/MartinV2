@@ -441,11 +441,18 @@ export default function App() {
     // Keep tablet exactly at 450, desktop at 0, and optimize for mobile screen sizes (use clean 0 base shift to let 35% right shift handle alignment)
     const mobileShift = isDesktop ? 0 : (isMobile ? 0 : 450);
 
+    // To prevent shifting away from context as desktop screen narrows from 1440px to 1024px, we scale down the left shift proportionately.
+    let desktopShiftFactor = 1.0;
+    if (isDesktop && vw < 1440) {
+      const ratio = Math.min(Math.max((vw - 1024) / (1440 - 1024), 0), 1);
+      desktopShiftFactor = 0.4 + ratio * 0.6; // interpolates from 0.4 (at 1024px) to 1.0 (at 1440px)
+    }
+
     // Shift the house 10% to the right (baseW * 0.1) on standard HD 1280x720p landscape screens to cover left/right symmetrically and keep it in frame
     // In mobile view (isMobile), we shift by dynamic mobileXFactor (starts at 35% at 667px height, and shifts rightward to 40% as height increases)
-    // Otherwise, shift left by 20% on desktop, or keep -18% (vw) on tablet
+    // Otherwise, shift left by 20% on desktop (scaled by desktopShiftFactor), or keep -18% (vw) on tablet
     const adjX = isDesktop 
-      ? (is720p ? (baseW * 0.1) : -(baseW * 0.2)) 
+      ? (is720p ? (baseW * 0.1) : -(baseW * 0.2 * desktopShiftFactor)) 
       : (isMobile ? (baseW * mobileXFactor) : -(vw * 0.18));
     const adjY = 0;
 
