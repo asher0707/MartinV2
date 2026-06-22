@@ -275,6 +275,8 @@ export default function App() {
   const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '', interest: 'Wohnen' });
 
   const [housePosition, setHousePosition] = useState({ x: 0, y: 0, scale: 1, blur: 0, baseW: 1400 });
+  const targetPosRef = useRef({ x: 0, y: 0, scale: 1, blur: 0, baseW: 1400 });
+  const currentPosRef = useRef({ x: 0, y: 0, scale: 1, blur: 0, baseW: 1400 });
 
   const heroRef = useRef<HTMLDivElement>(null);
   const darkSec1Ref = useRef<HTMLDivElement>(null);
@@ -396,28 +398,7 @@ export default function App() {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    // Specifically detect smaller laptops, standard HD 1280x720p landscape screens, and heights <= 768px in landscape mode
-    const is720p = isDesktop && (
-      (vw === 1280 && vh === 720) ||
-      (vw <= 1366 && vh <= 768)
-    );
-
-    const isMobile = !isDesktop && vw < 640;
-
-    // Responsive height-based scale and shift strictly for mobile view
-    // At vh <= 667, looks great with standard size and position. At vh >= 896 (e.g. newer models iPhone 14 Pro Max), 14% bigger, 40% to right, and 6% to above.
-    let mobileScaleMultiplier = 1.0;
-    let mobileXFactor = 0.35;
-    let mobileLowerYFactor = 0.03;
-    if (isMobile) {
-      const r = Math.min(Math.max((vh - 667) / (896 - 667), 0), 1);
-      mobileScaleMultiplier = 1.0 + r * 0.14; // 14% bigger at vh >= 896
-      mobileXFactor = 0.35 + r * 0.05; // 35% to right at 667px, 40% to right at 896px
-      mobileLowerYFactor = 0.03 - r * 0.09; // 3% below (positive offset) at 667px, 6% above (negative offset) at 896px
-    }
-
-    // Desktop gets 1400. Tablet gets 1557. Mobile gets 15% smaller (1557 * 0.85 = 1323) scaled by mobileScaleMultiplier
-    const baseW = isDesktop ? 1400 : (isMobile ? (1323 * mobileScaleMultiplier) : 1557);
+    const baseW = Math.max(vw, 1400);
 
     const imgH = imgRef.current ? imgRef.current.offsetHeight : 0;
     const heroH = heroRef.current ? heroRef.current.offsetHeight : vh;
@@ -425,8 +406,9 @@ export default function App() {
     const heroRect = heroRef.current ? heroRef.current.getBoundingClientRect() : { top: 0 };
     const darkRect = darkSec1Ref.current ? darkSec1Ref.current.getBoundingClientRect() : { bottom: vh * 2 };
 
-    const triggerPoint = 0;
-    const endPoint = -(heroH * 1.25);
+    // Start sliding slightly earlier and complete faster
+    const triggerPoint = -(heroH * 0.15);
+    const endPoint = heroRect.top - (darkRect.bottom - vh);
 
     const denom = endPoint - triggerPoint;
     let progress = 0;
@@ -434,54 +416,89 @@ export default function App() {
       progress = Math.min(Math.max((heroRect.top - triggerPoint) / denom, 0), 1);
     }
 
+    // Faster single smoothstep curve for faster progression
     const smoothstep = (val: number) => val * val * (3 - 2 * val);
-    const t = smoothstep(smoothstep(progress));
+    const t = smoothstep(progress);
 
-    // Shift 450px to the right (further to the right) in mobile view
-    // Keep tablet exactly at 450, desktop at 0, and optimize for mobile screen sizes (use clean 0 base shift to let 35% right shift handle alignment)
-    const mobileShift = isDesktop ? 0 : (isMobile ? 0 : 450);
+    const startX = (vw - baseW) / 2;
+    const startY = vh - imgH;
 
-    // To prevent shifting away from context as desktop screen narrows from 1440px to 1024px, we scale down the left shift proportionately.
-    let desktopShiftFactor = 1.0;
-    if (isDesktop && vw < 1440) {
-      const ratio = Math.min(Math.max((vw - 1024) / (1440 - 1024), 0), 1);
-      desktopShiftFactor = 0.4 + ratio * 0.6; // interpolates from 0.4 (at 1024px) to 1.0 (at 1440px)
-    }
-
-    // Shift the house 10% to the right (baseW * 0.1) on standard HD 1280x720p landscape screens to cover left/right symmetrically and keep it in frame
-    // In mobile view (isMobile), we shift by dynamic mobileXFactor (starts at 35% at 667px height, and shifts rightward to 40% as height increases)
-    // Otherwise, shift left by 20% on desktop (scaled by desktopShiftFactor), or keep -18% (vw) on tablet
-    const adjX = isDesktop 
-      ? (is720p ? (baseW * 0.1) : -(baseW * 0.2 * desktopShiftFactor)) 
-      : (isMobile ? (baseW * mobileXFactor) : -(vw * 0.18));
-    const adjY = 0;
-
-    const startX = (isDesktop && vw >= 1396) 
-      ? -5 
-      : ((vw - baseW) / 2 + mobileShift + adjX);
-    
-    // In mobile view, lower/raise the image by the dynamic model-adjusted percentage of viewport height (vh) as requested
-    const mobileLowerY = isMobile ? (vh * mobileLowerYFactor) : 0;
-
-    // Optimize mobile starts so the center of the image is perfectly framed vertically without excessive empty sky (bring layout down by 100px so it never overlaps text, shift down by 3% of vh)
-    const startY = isDesktop ? (is720p ? ((vh - imgH) / 2 + vh * 0.04) : ((vh - imgH) / 2 + 120)) : (isMobile ? (vh - imgH + 100 + mobileLowerY) : (vh - imgH + adjY));
     const finalScale = 1.45;
-    const finalX = (isDesktop && vw >= 1396)
-      ? (-0.225 * vw + 118.75)
-      : ((vw - baseW * finalScale) / 2 + mobileShift * finalScale + adjX);
-    const mobileOffset = !isDesktop ? -120 : 4;
-    const finalY = darkRect.bottom - imgH * finalScale + (isDesktop ? 500 : 400) + mobileOffset + adjY + mobileLowerY;
+    const finalX = (vw - baseW * finalScale) / 2;
+    const mobileOffset = vw < 1024 ? -250 : 4;
+    const finalY = darkRect.bottom - imgH * finalScale + 500 + mobileOffset;
 
-    if (progress <= 0) {
-      setHousePosition({ x: startX, y: startY, scale: 1, blur: 0, baseW });
-    } else {
-      const currentX = startX + t * (finalX - startX);
-      const currentY = startY + t * (finalY - startY);
-      const currentScale = 1 + t * (finalScale - 1);
-      const currentBlur = t * 16;
-      setHousePosition({ x: currentX, y: currentY, scale: currentScale, blur: currentBlur, baseW });
+    let nextX = startX;
+    let nextY = startY;
+    let nextScale = 1;
+    let nextBlur = 0;
+
+    if (progress > 0) {
+      nextX = startX + t * (finalX - startX);
+      nextY = startY + t * (finalY - startY);
+      nextScale = 1 + t * (finalScale - 1);
+      nextBlur = t * 16;
     }
-  }, [isDesktop]);
+
+    const nextPos = { x: nextX, y: nextY, scale: nextScale, blur: nextBlur, baseW };
+    targetPosRef.current = nextPos;
+
+    // Apply instantly on mobile or before preloader is done to prevent lag
+    if (!isDesktop || !liftDone) {
+      currentPosRef.current = nextPos;
+      setHousePosition(nextPos);
+    }
+  }, [isDesktop, liftDone]);
+
+  // Inertial scroll animator via requestAnimationFrame (runs on desktop view only for extreme smoothness)
+  useEffect(() => {
+    if (!isDesktop || !liftDone) return;
+
+    let rafId: number;
+    const lerp = (start: number, end: number, speed: number) => {
+      return start + (end - start) * speed;
+    };
+
+    const tick = () => {
+      const target = targetPosRef.current;
+      const current = currentPosRef.current;
+
+      const dx = target.x - current.x;
+      const dy = target.y - current.y;
+      const ds = target.scale - current.scale;
+      const db = target.blur - current.blur;
+
+      // Epsilon-based threshold check
+      if (
+        Math.abs(dx) > 0.01 ||
+        Math.abs(dy) > 0.01 ||
+        Math.abs(ds) > 0.0001 ||
+        Math.abs(db) > 0.01
+      ) {
+        // High quality lerp speed of 0.13 for extremely responsive, modern inertia
+        const speed = 0.13;
+        current.x = lerp(current.x, target.x, speed);
+        current.y = lerp(current.y, target.y, speed);
+        current.scale = lerp(current.scale, target.scale, speed);
+        current.blur = lerp(current.blur, target.blur, speed);
+        current.baseW = target.baseW;
+
+        setHousePosition({
+          x: current.x,
+          y: current.y,
+          scale: current.scale,
+          blur: current.blur,
+          baseW: current.baseW,
+        });
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(rafId);
+    };
+  }, [isDesktop, liftDone]);
 
   // Combined listener hook
   useEffect(() => {
@@ -629,22 +646,43 @@ export default function App() {
           .hero-subtitle-mobile  { display: block !important; }
           .hero-text-block { padding-top: 110px !important; text-align: center !important; }
           .hero-title { 
-            font-size: clamp(26px, 8.5vw, 34px) !important; 
+            font-size: clamp(32px, 11vw, 44px) !important; 
             white-space: normal !important; 
-            max-width: 320px !important; 
+            max-width: 360px !important; 
             line-height: 1.15 !important; 
             letter-spacing: -0.03em !important; 
             text-align: center !important; 
             font-weight: 900 !important;
             margin: 0 auto !important;
           }
+          .hero-subtitle-mobile p {
+            font-size: clamp(14px, 4.2vw, 18px) !important;
+          }
         }
         
         @media (min-width: 640px) and (max-width: 1023px) {
-          .hero-subtitle-desktop { display: none !important; }
-          .hero-subtitle-mobile  { display: block !important; }
-          .hero-text-block { padding-top: 150px !important; text-align: center !important; }
-          .hero-title { font-size: clamp(22px, 5.0vw, 36px) !important; white-space: nowrap !important; letter-spacing: -0.03em !important; text-align: center !important; }
+          .hero-subtitle-desktop { display: block !important; }
+          .hero-subtitle-mobile  { display: none !important; }
+          .hero-text-block { 
+            padding-top: clamp(100px, 15vh, 160px) !important; 
+            text-align: center !important; 
+            gap: 1.5rem !important;
+          }
+          .hero-title { 
+            font-size: clamp(38px, 6.5vw, 52px) !important; 
+            white-space: nowrap !important; 
+            letter-spacing: -0.04em !important; 
+            text-align: center !important; 
+            line-height: 1.1 !important;
+            margin: 0 auto !important;
+          }
+          .hero-subtitle-desktop p {
+            font-size: clamp(15px, 2.4vw, 20px) !important;
+            max-width: 520px !important;
+            margin: 0 auto !important;
+            line-height: 1.5 !important;
+            opacity: 0.85 !important;
+          }
         }
         
         @media (min-width: 1024px) {
@@ -730,7 +768,7 @@ export default function App() {
           pointerEvents: liftDone ? 'none' : 'auto'
         }}
       >
-        <div className="flex items-baseline font-syne text-[2.6rem] text-white tracking-[-0.02em]">
+        <div className="flex items-baseline font-syne text-[2.6rem] lg:text-[4.2rem] text-white tracking-[-0.02em] lg:tracking-[-0.03em]">
           {FULL_TEXT.slice(0, typedLength).split('').map((char, index) => {
             const isDot = char === '.';
             return (
@@ -742,7 +780,7 @@ export default function App() {
           {showCursor && (
             <span 
               id="typewriter-cursor"
-              className="inline-block w-[3px] h-[1.1em] rounded bg-white ml-[3px] self-center cursor-blink"
+              className="inline-block w-[3px] lg:w-[5px] h-[1.1em] rounded bg-white ml-[3px] lg:ml-[5px] self-center cursor-blink"
             />
           )}
         </div>
@@ -751,7 +789,7 @@ export default function App() {
       {/* Section 2 — Permanent Navigation Bar with Bauhaus Grid Architecture */}
       <nav 
         id="navbar"
-        className="fixed top-0 left-0 right-0 z-50 flex items-stretch h-16 sm:h-20 border-b backdrop-blur-md"
+        className="fixed top-0 left-0 right-0 z-50 flex items-stretch h-20 md:h-26 border-b backdrop-blur-md"
         style={{ 
           borderColor: `${navColor}15`, 
           backgroundColor: navColor === '#ffffff' ? 'rgba(26, 26, 26, 0.82)' : 'rgba(245, 240, 234, 0.82)',
@@ -772,10 +810,19 @@ export default function App() {
               setCurrentPage('home');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="font-syne text-[10px] min-[360px]:text-xs xs:text-sm tracking-[0.1em] xs:tracking-[0.2em] uppercase select-none cursor-pointer flex-shrink-0"
+            className="flex items-center select-none cursor-pointer flex-shrink-0 py-1"
           >
-            <span className="font-black" style={{ color: navColor }}>swissrealplan</span>
-            <span className="font-extrabold text-[#5c0612]">.</span>
+            <img 
+              src="https://lh3.googleusercontent.com/d/1GH4Mc4vCHg7nbnwjZspD6SOu4Kp0OlZO" 
+              alt="swissrealplan" 
+              referrerPolicy="no-referrer"
+              className="h-16 md:h-22 w-auto object-contain transition-all duration-300"
+              style={{
+                filter: navColor === '#ffffff' 
+                  ? 'brightness(0) invert(1)' 
+                  : 'none'
+              }}
+            />
           </a>
         </div>
 
@@ -931,10 +978,10 @@ export default function App() {
           top: 0,
           left: 0,
           width: '100%',
-          minWidth: `${housePosition.baseW || (isDesktop ? 1400 : 1557)}px`,
+          minWidth: `${housePosition.baseW || 1400}px`,
           transform: `translate(${housePosition.x}px, ${housePosition.y}px) scale(${housePosition.scale})`,
           transformOrigin: 'top left',
-          display: currentPage === 'home' ? 'block' : 'none',
+          display: currentPage === 'home' && isDesktop ? 'block' : 'none',
         }}
       >
         <div
@@ -967,7 +1014,7 @@ export default function App() {
       <section 
         id="hero"
         ref={heroRef}
-        className="relative min-h-screen overflow-visible flex flex-col justify-start"
+        className={`relative min-h-screen overflow-visible flex flex-col ${isDesktop ? 'justify-start' : 'justify-between pt-28 pb-0'}`}
         style={{
           backgroundImage: `url(${BG_IMG})`,
           backgroundSize: 'cover',
@@ -983,7 +1030,9 @@ export default function App() {
           className="hero-text-block z-10 w-full flex flex-col items-center justify-center text-center px-4"
           style={{
             opacity: showHeroText ? 1 : 0,
-            transform: showHeroText ? 'translateY(0px)' : 'translateY(-28px)',
+            transform: showHeroText 
+              ? (isDesktop ? 'translateY(0px)' : 'translateY(-10vh)') 
+              : (isDesktop ? 'translateY(-28px)' : 'translateY(calc(-10vh - 28px))'),
             transition: 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s'
           }}
         >
@@ -1008,6 +1057,22 @@ export default function App() {
             </p>
           </div>
         </div>
+
+        {!isDesktop && (
+          <div className="w-full max-w-[560px] sm:max-w-[700px] mx-auto px-4 z-10 select-none flex-grow flex items-end justify-center overflow-visible">
+            <img 
+              src={HOUSE_IMG} 
+              alt="Swissrealplan Luxury Mansion" 
+              className="w-full h-auto max-h-[48vh] object-contain mx-auto"
+              style={{
+                filter: 'none',
+                transform: 'scaleX(-1) scale(2.97) translateX(-40%)',
+                transformOrigin: 'bottom center'
+              }}
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        )}
       </section>
 
       {/* Area anchors */}
@@ -1562,52 +1627,32 @@ export default function App() {
       )}
 
       {/* Slick responsive interactive footnote section anchor */}
-      <footer id="inquire" className="relative z-30 bg-[#5c0612] text-[#f5f0ea] py-16 px-6 md:px-10 lg:px-16">
-        <div className="max-w-7xl mx-auto border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center text-xs font-mono text-white/40 gap-4">
-          <div>
-            © {new Date().getFullYear()} SWISSREALPLAN PRIVATE LIMITED. ALLE RECHTE VORBEHALTEN.
+      <footer id="inquire" className="relative z-30 bg-[#5c0612] text-[#f5f0ea] py-10 md:py-16 px-6 md:px-10 lg:px-16">
+        <div className="max-w-7xl mx-auto border-t border-white/10 pt-8">
+          
+          {/* Mobile Footer Area (visible on mobile only) */}
+          <div className="block md:hidden space-y-4 text-center text-xs font-mono">
+            <div className="text-white/70 font-sans text-[11px] leading-relaxed space-y-1">
+              <p><strong>Visp:</strong> Terbinerstrasse 28, 3930 Visp</p>
+              <p><strong>Murten:</strong> Irisweg 14, 3280 Murten</p>
+            </div>
+            <div className="text-white/70 text-[11px] pt-1">
+              <a href="tel:+41789136572" className="hover:text-white transition-colors">+41 78 913 65 72</a>
+              <span className="mx-2 text-white/20">|</span>
+              <a href="mailto:swiss.realplan.immo@gmx.ch" className="hover:text-white transition-colors">swiss.realplan.immo@gmx.ch</a>
+            </div>
+            <div className="pt-4 border-t border-white/5 text-[10px] text-white/35 uppercase tracking-widest">
+              Swissrealplan 2026
+            </div>
           </div>
-          <div className="flex gap-6 uppercase font-mono">
-            <a 
-              href="#story" 
-              onClick={(e) => {
-                e.preventDefault();
-                setCurrentPage('home');
-                setTimeout(() => {
-                  document.getElementById('story')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 80);
-              }}
-              className="hover:text-white transition-colors"
-            >
-              Geschichte
-            </a>
-            <a 
-              href="#residences" 
-              onClick={(e) => {
-                e.preventDefault();
-                setCurrentPage('home');
-                setTimeout(() => {
-                  document.getElementById('residences')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 80);
-              }}
-              className="hover:text-white transition-colors"
-            >
-              Residenzen
-            </a>
-            <a 
-              href="#listings" 
-              onClick={(e) => {
-                e.preventDefault();
-                setCurrentPage('home');
-                setTimeout(() => {
-                  document.getElementById('listings')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 80);
-              }}
-              className="hover:text-white transition-colors"
-            >
-              Projekte
-            </a>
+
+          {/* Desktop Footer Area (visible on desktop only) */}
+          <div className="hidden md:flex justify-center items-center text-xs font-mono text-white/40">
+            <div>
+              © 2026 SWISSREALPLAN PRIVATE LIMITED. ALLE RECHTE VORBEHALTEN.
+            </div>
           </div>
+
         </div>
       </footer>
 
