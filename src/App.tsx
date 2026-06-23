@@ -692,6 +692,29 @@ export default function App() {
           .hero-title { font-size: clamp(42px, 5.2vw, 6.2vw) !important; white-space: nowrap !important; letter-spacing: -0.04em !important; text-align: center !important; }
         }
 
+        /* Optimize hero title position & size on short landscape viewports (e.g., 1280x720p and below) */
+        @media (min-width: 1024px) and (max-height: 768px) and (orientation: landscape) {
+          .hero-text-block { 
+            padding-top: calc(18vh + 12px) !important; 
+          }
+          .hero-title { 
+            font-size: clamp(32px, 4.2vw, 46px) !important; 
+          }
+          .hero-subtitle-desktop {
+            margin-top: 0.75rem !important;
+          }
+        }
+
+        /* Thinner navbar & scaled logo on shorter landscape monitors to maximize visible content area */
+        @media (max-height: 768px) and (orientation: landscape) {
+          #navbar {
+            height: 4.5rem !important; /* Compact 72px thickness */
+          }
+          #navbar #nav-logo img {
+            height: 3rem !important; /* Elegant 48px size */
+          }
+        }
+
         /* Section 5 Responsive layout behaviors */
         @media (max-width: 1023px) {
           .s2-section {
