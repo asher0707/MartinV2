@@ -711,7 +711,7 @@ export default function App() {
             height: 4.5rem !important; /* Compact 72px thickness */
           }
           #navbar #nav-logo img {
-            height: 3rem !important; /* Elegant 48px size */
+            height: 3.9rem !important; /* Larger prominent size */
           }
         }
 
@@ -1159,7 +1159,7 @@ export default function App() {
                   {/* Stat Col 2 */}
                   <div className="flex flex-col border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-6">
                     <span className="font-mono text-[9px] tracking-[0.25em] text-[#e8e4df]/40 block mb-1 uppercase font-semibold">02 / Individualität</span>
-                    <h5 className="font-syne text-[11px] sm:text-xs font-semibold text-white tracking-widest uppercase mb-2">Bespoke Ausbau</h5>
+                    <h5 className="font-syne text-[11px] sm:text-xs font-semibold text-white tracking-widest uppercase mb-2">Ausbau</h5>
                     <p className="font-sans text-[11px] sm:text-xs text-white/50 leading-relaxed">
                       Individuelle Architektur und hochwertige Bauelemente, ideal auf Ihre Visionen abgestimmt.
                     </p>
@@ -1282,7 +1282,7 @@ export default function App() {
                 Ausgeführte Projekte
               </h2>
               <p className="font-syne text-lg md:text-2xl text-[#5c0612]/70 tracking-tight font-light mt-4 max-w-2xl">
-                Dreißig Jahre, verdichtet in Stein, Glas und Licht.
+                Vierzig Jahre, verdichtet in Stein, Glas und Licht.
               </p>
             </div>
             
