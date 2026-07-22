@@ -1,11 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, ArrowRight, ArrowUpRight, Menu } from 'lucide-react';
+import { X, ArrowRight, ArrowUpRight, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const TEAM_IMG = 'https://lh3.googleusercontent.com/d/1b8ek71gEEX40cTfi92DEWMi0UiY4acd_';
 const SAAS_FEE_IMG = 'https://lh3.googleusercontent.com/d/1rXF5RqLfZ30CPNumn7Ipt0pyIdJU-N0P';
 const EGGERBERG_IMG = 'https://lh3.googleusercontent.com/d/1GYOQcCL8KPrgYvq1wXvYT_lz6R50YSxP';
 const ERB_IMG = 'https://lh3.googleusercontent.com/d/1c-LSr5LTqPqZzY5HoPoIFjxpobyQ1hHz';
-const GREEN_VILLAGE_IMG = 'https://lh3.googleusercontent.com/d/12qxLUc7PW3OnMrDfCgf2-aMGC-Wnt6te';
+const GREEN_VILLAGE_IMG = 'https://lh3.googleusercontent.com/d/1qh4XqLi8VsvaS0BjNZSKRr7ZW93TLtxp';
+const INS_BANDRAIN_IMG = 'https://lh3.googleusercontent.com/d/10goCakzSyJg0bf5N-LlJOc-Vn01bP__w';
+const MUNTSCHEMIER_IMG = 'https://lh3.googleusercontent.com/d/1OEXwoQnUlpK7saMtNoC-5YpKlLzZ3cAA';
+
+const MUNTSCHEMIER_GALLERY = [
+  'https://lh3.googleusercontent.com/d/1OEXwoQnUlpK7saMtNoC-5YpKlLzZ3cAA',
+  'https://lh3.googleusercontent.com/d/1ZsAu8B5nxy-N_vOQU4iApo1iAdZKsZSW',
+  'https://lh3.googleusercontent.com/d/14TSRrLU78jp-EXMANuYNi1zYdCatejyE',
+];
+
+const INS_GALLERY = [
+  'https://lh3.googleusercontent.com/d/1Fz8EpUGHDzNJgrk1-mZX661me_YCi8z0',
+  'https://lh3.googleusercontent.com/d/1PSc10zsvJ5I3WvrfsmLPWaKTgMoNd3hl',
+];
 
 const CARD_1_IMG = 'https://lh3.googleusercontent.com/d/1dwiOPt1oZlD_M63G4Yks2bQ_ycEYrAl_';
 const CARD_2_IMG = 'https://lh3.googleusercontent.com/d/1CY9xtbgV4kBaz5yknrOmwiQBiuW8Gmrl';
@@ -51,6 +64,7 @@ interface GalleryExpandItem {
   subtitle: string;
   img: string;
   link: string;
+  galleryImages?: string[];
 }
 
 const GALLERY_EXPAND_ITEMS: GalleryExpandItem[] = [
@@ -77,6 +91,20 @@ const GALLERY_EXPAND_ITEMS: GalleryExpandItem[] = [
     subtitle: "Neu Fix 9 may",
     img: GREEN_VILLAGE_IMG,
     link: "coming-soon"
+  },
+  {
+    title: "Ins - Bandrain",
+    subtitle: "Neu",
+    img: INS_BANDRAIN_IMG,
+    link: "gallery-ins",
+    galleryImages: INS_GALLERY
+  },
+  {
+    title: "Müntschemier - Neuengasse",
+    subtitle: "Neu",
+    img: MUNTSCHEMIER_IMG,
+    link: "gallery-muntschemier",
+    galleryImages: MUNTSCHEMIER_GALLERY
   }
 ];
 
@@ -266,6 +294,11 @@ export default function App() {
 
   const [navColor, setNavColor] = useState('#5c0612');
   const [showComingSoon, setShowComingSoon] = useState(false);
+  const [activeGalleryModal, setActiveGalleryModal] = useState<{
+    title: string;
+    images: string[];
+    currentIndex: number;
+  } | null>(null);
   const [isDesktop, setIsDesktop] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [windowHeight, setWindowHeight] = useState(800);
@@ -301,6 +334,28 @@ export default function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Keyboard controls for project gallery modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!activeGalleryModal) return;
+      if (e.key === 'Escape') {
+        setActiveGalleryModal(null);
+      } else if (e.key === 'ArrowLeft') {
+        setActiveGalleryModal(prev => prev ? {
+          ...prev,
+          currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length
+        } : null);
+      } else if (e.key === 'ArrowRight') {
+        setActiveGalleryModal(prev => prev ? {
+          ...prev,
+          currentIndex: (prev.currentIndex + 1) % prev.images.length
+        } : null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeGalleryModal]);
 
   // Prevent background scroll when mobile menu is open
   useEffect(() => {
@@ -1184,11 +1239,11 @@ export default function App() {
       {/* Area Anchor */}
       <div id="listings" />
 
-      {/* Section 6 — Hover-Expand Gallery (slides over Section 5 via negative margin-top: -100vh) */}
+      {/* Section 6 — Showcase Gallery (2 rows of 3 wide cards) */}
       <section 
         ref={darkSec2Ref}
         id="portfolio"
-        className="s3-gallery-section relative z-25 -mt-[100vh] bg-[#1a1a1a] h-[100vh] overflow-hidden"
+        className="s3-gallery-section relative z-25 -mt-[100vh] bg-[#1a1a1a] min-h-[100vh] overflow-hidden flex items-center justify-center py-16 sm:py-20"
       >
         {/* Background slower ticker */}
         <div className="s3-ticker-wrap absolute inset-0 flex items-center overflow-hidden z-0 pointer-events-none opacity-[0.04]">
@@ -1202,60 +1257,71 @@ export default function App() {
           </div>
         </div>
 
-        {/* Dynamic Gallery Contents */}
-        <div className="s3-gallery-content relative z-[1] w-full h-full flex items-center justify-center p-[clamp(24px,4vw,60px)]">
+        {/* Dynamic Gallery Contents - 2 rows of 3 wide horizontal cards with expanded length and height */}
+        <div className="s3-gallery-content relative z-[1] w-full max-w-[1520px] mx-auto px-4 sm:px-8 lg:px-12 my-auto">
           
-          <div className="gallery-expand-row flex w-full h-[70%] max-w-[1200px] gap-1.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 w-full">
             {GALLERY_EXPAND_ITEMS.map((item, index) => {
               const isComingSoon = item.link === "coming-soon";
-              // Disable hover expand accordion animation for low-height landscapes (e.g. 1280x720p)
-              const isHoverAnimEnabled = isDesktop && windowHeight > 768;
-              const isTextVisible = !isHoverAnimEnabled || (hoveredIdx === index);
+              const hasGallery = Boolean(item.galleryImages && item.galleryImages.length > 0);
               return (
                 <a
                   key={index}
-                  href={isComingSoon ? "#" : item.link}
-                  target={isComingSoon ? undefined : "_blank"}
-                  rel={isComingSoon ? undefined : "noopener noreferrer"}
+                  href={hasGallery || isComingSoon ? "#" : item.link}
+                  target={hasGallery || isComingSoon ? undefined : "_blank"}
+                  rel={hasGallery || isComingSoon ? undefined : "noopener noreferrer"}
                   onClick={(e) => {
-                    if (isComingSoon) {
+                    if (hasGallery && item.galleryImages) {
+                      e.preventDefault();
+                      setActiveGalleryModal({
+                        title: item.title,
+                        images: item.galleryImages,
+                        currentIndex: 0,
+                      });
+                    } else if (isComingSoon) {
                       e.preventDefault();
                       setShowComingSoon(true);
                     }
                   }}
-                  className="gallery-expand-item group relative rounded-xl overflow-hidden cursor-pointer block"
-                  style={isDesktop ? {
-                    flexGrow: isHoverAnimEnabled ? (hoveredIdx === index ? 2.5 : (hoveredIdx !== null ? 0.5 : 1)) : 1,
-                    flexShrink: 1,
-                    flexBasis: '0%'
-                  } : undefined}
-                  onMouseEnter={() => isHoverAnimEnabled && setHoveredIdx(index)}
-                  onMouseLeave={() => isHoverAnimEnabled && setHoveredIdx(null)}
+                  className="group relative aspect-[16/11.5] min-h-[230px] sm:min-h-[270px] lg:min-h-[320px] w-full rounded-2xl overflow-hidden cursor-pointer block border border-white/12 hover:border-white/40 transition-all duration-500 shadow-2xl bg-[#222]"
                 >
-                  {/* Elegant bottom-up soft vignette to protect white text legibility without overall image dimming */}
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
+                  {/* Subtle top badge */}
+                  {item.subtitle && (
+                    <div className="absolute top-4 left-4 z-20 px-3.5 py-1.5 bg-black/65 backdrop-blur-md rounded-full border border-white/15">
+                      <span className="font-mono text-[9px] sm:text-[10px] tracking-widest text-[#f5f0ea]/90 uppercase block font-medium">
+                        {item.subtitle}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Bottom-up soft vignette for readable white typography */}
+                  <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/85 via-black/40 to-transparent z-10 pointer-events-none group-hover:from-black/95 transition-all duration-500" />
 
                   {/* Cover image */}
                   <img
                     src={item.img}
                     alt={item.title}
-                    className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-700 ease-out group-hover:scale-108"
                     referrerPolicy="no-referrer"
+                    loading="lazy"
                   />
 
-                  {/* Gentle elegant slide text inside expanded element for luxury atmosphere */}
-                  <div className={`absolute bottom-6 left-6 right-6 sm:bottom-10 sm:left-10 sm:right-10 z-20 text-[#f5f0ea] transition-all duration-500 ${
-                    isTextVisible 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 pointer-events-none translate-y-4'
-                  }`}>
-                    <div className="flex items-end justify-between gap-4">
+                  {/* Card Title & Link Arrow */}
+                  <div className="absolute bottom-5 left-5 right-5 sm:bottom-6 sm:left-6 sm:right-6 z-20 text-[#f5f0ea]">
+                    <div className="flex items-end justify-between gap-3">
                       <div>
-                        <h4 className="font-syne font-black tracking-tight uppercase leading-none text-base sm:text-xl lg:text-2xl [text-shadow:_0_2px_4px_rgba(0,0,0,0.8)]">
+                        <h4 className="font-syne font-extrabold tracking-tight uppercase leading-tight text-base sm:text-xl lg:text-2xl [text-shadow:_0_2px_4px_rgba(0,0,0,0.8)] group-hover:text-white transition-colors">
                           {item.title}
                         </h4>
+                        {hasGallery && (
+                          <span className="font-mono text-[10px] sm:text-xs text-white/70 tracking-widest uppercase block mt-1 font-medium">
+                            {item.galleryImages?.length} Galerie-Bilder
+                          </span>
+                        )}
                       </div>
-                      <ArrowUpRight className="opacity-85 flex-shrink-0 mb-0.5 transition-all duration-300 w-5 h-5 sm:w-7 sm:h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+                      <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 group-hover:bg-white group-hover:text-black transition-all duration-300 flex items-center justify-center flex-shrink-0">
+                        <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </div>
                     </div>
                   </div>
                 </a>
@@ -1700,6 +1766,106 @@ export default function App() {
             >
               Schliessen
             </button>
+          </div>
+        </div>
+      )}
+
+      {activeGalleryModal && (
+        <div 
+          className="fixed inset-0 z-[9999] flex flex-col justify-between bg-black/95 backdrop-blur-xl p-4 sm:p-6 lg:p-8 select-none"
+          onClick={() => setActiveGalleryModal(null)}
+        >
+          {/* Lightbox Header */}
+          <div 
+            className="flex items-center justify-between w-full max-w-6xl mx-auto z-10 pt-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <span className="font-mono text-[10px] sm:text-xs tracking-[0.25em] text-white/50 uppercase block font-semibold mb-0.5">
+                SWISSREALPLAN PROJEKTE
+              </span>
+              <h3 className="font-syne text-white text-lg sm:text-2xl font-extrabold uppercase tracking-wide">
+                {activeGalleryModal.title}
+              </h3>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <span className="font-mono text-xs sm:text-sm text-white/70 tracking-widest">
+                {activeGalleryModal.currentIndex + 1} / {activeGalleryModal.images.length}
+              </span>
+              <button
+                onClick={() => setActiveGalleryModal(null)}
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
+                aria-label="Modal schliessen"
+              >
+                <X size={22} />
+              </button>
+            </div>
+          </div>
+
+          {/* Lightbox Main Image Display */}
+          <div 
+            className="relative flex-1 flex items-center justify-center my-4 w-full max-w-6xl mx-auto overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {activeGalleryModal.images.length > 1 && (
+              <button
+                onClick={() => setActiveGalleryModal(prev => prev ? {
+                  ...prev,
+                  currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length
+                } : null)}
+                className="absolute left-2 sm:left-4 z-20 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all cursor-pointer hover:scale-105"
+                aria-label="Vorheriges Bild"
+              >
+                <ChevronLeft size={26} />
+              </button>
+            )}
+
+            <img
+              key={activeGalleryModal.currentIndex}
+              src={activeGalleryModal.images[activeGalleryModal.currentIndex]}
+              alt={`${activeGalleryModal.title} - Bild ${activeGalleryModal.currentIndex + 1}`}
+              className="max-h-[68vh] sm:max-h-[72vh] w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300 border border-white/10"
+              referrerPolicy="no-referrer"
+            />
+
+            {activeGalleryModal.images.length > 1 && (
+              <button
+                onClick={() => setActiveGalleryModal(prev => prev ? {
+                  ...prev,
+                  currentIndex: (prev.currentIndex + 1) % prev.images.length
+                } : null)}
+                className="absolute right-2 sm:right-4 z-20 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all cursor-pointer hover:scale-105"
+                aria-label="Nächstes Bild"
+              >
+                <ChevronRight size={26} />
+              </button>
+            )}
+          </div>
+
+          {/* Thumbnails strip */}
+          <div 
+            className="flex items-center justify-center gap-3 w-full max-w-2xl mx-auto z-10 overflow-x-auto py-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {activeGalleryModal.images.map((imgUrl, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveGalleryModal(prev => prev ? { ...prev, currentIndex: idx } : null)}
+                className={`relative w-16 h-12 sm:w-20 sm:h-14 rounded-lg overflow-hidden border-2 transition-all cursor-pointer flex-shrink-0 ${
+                  activeGalleryModal.currentIndex === idx
+                    ? 'border-white scale-105 shadow-lg opacity-100'
+                    : 'border-transparent opacity-50 hover:opacity-85'
+                }`}
+              >
+                <img
+                  src={imgUrl}
+                  alt={`Thumbnail ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              </button>
+            ))}
           </div>
         </div>
       )}
