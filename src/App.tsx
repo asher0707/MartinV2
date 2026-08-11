@@ -90,7 +90,7 @@ const GALLERY_EXPAND_ITEMS: GalleryExpandItem[] = [
     title: "Green village in Visp",
     subtitle: "Neu Fix 9 may",
     img: GREEN_VILLAGE_IMG,
-    link: "coming-soon"
+    link: "https://greenvillagehome.info/"
   },
   {
     title: "Ins - Bandrain",
